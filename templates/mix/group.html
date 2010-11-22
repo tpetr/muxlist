@@ -1,0 +1,21 @@
+Logged in as {{ user }} (<a href="/account/logout">logout</a>)<br>
+yaaaaay.<br>
+<object type="application/x-shockwave-flash" width="400" height="40"
+data="/static/xspf_player_slim.swf?playlist_url=/mix/{{ group }}/xspf">
+<param name="movie" 
+value="/static/xspf_player_slim.swf?playlist_url=/mix/{{ group }}/xspf" />
+</object>
+<br>
+playlist:
+<ol>
+{% for entry in entries %}
+<li>{{ entry.track }} [{{ entry.user }}]</li>
+{% endfor %}
+</ol>
+Add:
+<form method="post" action="/music/upload?next=/mix/{{ group }}/">
+{{ form.url }}
+<input type="hidden" name="group" value="{{ group.id }}">
+<input type="submit">
+</form>
+<!-- <iframe src="http://www.facebook.com/plugins/live_stream_box.php?app_id=178303438850442&amp;width=400&amp;height=500&amp;xid=group{{ group.id }}&amp;via_url&amp;always_post_to_friends=false" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:400px; height:500px;" allowTransparency="true"></iframe> -->

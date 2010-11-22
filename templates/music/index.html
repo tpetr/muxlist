@@ -1,0 +1,30 @@
+Whats up, {{ user }}?<br>
+Uploaded tracks:
+<ul>
+{% for track in uploaded_tracks %}
+<li>{{ track }}</li>
+{% empty %}
+<li><i>None, how lame...</i></li>
+{% endfor %}
+</ul>
+Upload a track:
+<form method="POST" action="/music/upload?next=/music/">
+{{ form }}
+<input type="submit" value="gogogo">
+</form>
+<br>
+Favorite tracks:
+<ul>
+{% for track in favorite_tracks %}
+<li>{{ track }}</li>
+{% empty %}
+<li><i>None, how lame...</i></li>
+{% endfor %}
+</ul>
+<br><br>
+Groups you're in
+<ul>
+{% for group in groups %}
+<li><a href="/mix/{{ group }}/">{{ group }}</a></li>
+{% endfor %}
+</ul>
