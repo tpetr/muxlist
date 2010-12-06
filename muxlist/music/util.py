@@ -22,16 +22,28 @@ def get_track_data_from_url(url):
         except EOFError:
             byte_count += 10000
 
-    artist = audio['artist']
-    if isinstance(artist, list): artist = artist[0]
+    try:
+        artist = audio['artist']
+        if isinstance(artist, list): artist = artist[0]
+    except KeyError:
+        artist = "(Unknown Artist)"
 
-    album = audio.get('album', '')
-    if isinstance(album, list): album = album[0]
+    try:
+        album = audio.get('album', '')
+        if isinstance(album, list): album = album[0]
+    except KeyError:
+        album = "(Unknown Album)"
 
-    title = audio['title']
-    if isinstance(title, list): title = title[0]
+    try:
+        title = audio['title']
+        if isinstance(title, list): title = title[0]
+    except KeyError:
+        title = "(Unknown Title)"
 
-    year = audio.get('date', None)
-    if isinstance(year, list): year = year[0]
+    try:
+        year = audio.get('date', None)
+        if isinstance(year, list): year = year[0]
+    except KeyError:
+        year = "2010"
 
     return (artist, album, title, year, None)

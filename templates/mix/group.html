@@ -1,21 +1,66 @@
-Logged in as {{ user }} (<a href="/account/logout">logout</a>)<br>
-yaaaaay.<br>
-<object type="application/x-shockwave-flash" width="400" height="40"
-data="/static/xspf_player_slim.swf?playlist_url=/mix/{{ group }}/xspf">
-<param name="movie" 
-value="/static/xspf_player_slim.swf?playlist_url=/mix/{{ group }}/xspf" />
-</object>
-<br>
-playlist:
-<ol>
-{% for entry in entries %}
-<li>{{ entry.track }} [{{ entry.user }}]</li>
+<html>
+<head>
+<script>document.domain = document.domain;</script>
+<title>muxlist</title>
+<!-- <script src="http://code.jquery.com/jquery-1.4.4.min.js"></script> -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="/static/Orbited.js"></script>
+<script>
+Orbited.settings.port = 9000;
+Orbited.settings.hostname = "65.96.165.156";
+TCPSocket = Orbited.TCPSocket
+</script>
+<script src="/static/stomp.js"></script>
+<script src="/static/jquery.jplayer.min.js"></script>
+<script>
+var stomp;
+$(document).ready(function () {
+	$("#jplayer").jPlayer({ swfPath: '/static/', volume: 50 });
+	stomp = new STOMPClient();
+	stop.onopen = function () {
+		alert("opening client");
+	};
+	stomp.onconnectedframe = function () {
+		$("<li><i>Connected to channel /mix/{{ group.name }} -- shit's sooo cash!</i></li>").appendTo('#stream');
+		stomp.subscribe('/mix/{{ group.name }}');
+	};
+        stomp.onmessageframe = function (frame) {
+		data = JSON.parse(frame.body);
+		if (data.type == 'chat') {
+			$('<li><b>' + data.user + '</b>: ' + data.message + '</li>').appendTo('#stream');
+		} else if (data.type == 'song') {
+			$('<li><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
+			$('#jplayer').jPlayer('stop').jPlayer('setFile', data.url).jPlayer('play');
+			
+		}
+	}
+	stomp.connect('localhost', 61613);
+});
+function send_chat() {
+	$.post('./add/', {'msg': $('#message').val()});
+	$('#message').val('').focus();
+}
+function play_song(id) {
+	$.post('./song/', {'id': id});
+}
+function send_chat_enter(event) {
+	if (event.keyCode == 13) {
+		send_chat();
+	}
+}
+</script>
+</head>
+<body>
+<div id="jplayer"></div>
+<ul id="stream">
+</ul>
+Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()">
+<h4>Your music:</h4>
+<ul>
+{% for track in tracks %}
+<li>{{ track.artist }} - {{ track.title }} <input type="button" value="Play" onclick="play_song({{ track.id }})"></li>
 {% endfor %}
-</ol>
-Add:
-<form method="post" action="/music/upload?next=/mix/{{ group }}/">
-{{ form.url }}
-<input type="hidden" name="group" value="{{ group.id }}">
-<input type="submit">
-</form>
-<!-- <iframe src="http://www.facebook.com/plugins/live_stream_box.php?app_id=178303438850442&amp;width=400&amp;height=500&amp;xid=group{{ group.id }}&amp;via_url&amp;always_post_to_friends=false" scrolling="no" frameborder="0" style="border:none; overflow:hidden; width:400px; height:500px;" allowTransparency="true"></iframe> -->
+</ul>
+<input type="button" value="Stop (just me)" onclick="$('#jplayer').jPlayer('stop')">
+</body>
+</html>
