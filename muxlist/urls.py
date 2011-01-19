@@ -18,4 +18,5 @@ urlpatterns += patterns('',
     (r'^music/', include('muxlist.music.urls')),
     (r'^admin/', include(admin.site.urls)),
     (r'^account/', include('muxlist.account.urls')),
+    (r'^restq/', include('muxlist.restq.urls')),
 )

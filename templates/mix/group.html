@@ -2,26 +2,24 @@
 <head>
 <script>document.domain = document.domain;</script>
 <title>muxlist</title>
-<!-- <script src="http://code.jquery.com/jquery-1.4.4.min.js"></script> -->
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.4/jquery.min.js"></script>
+<script src="/static/jquery-1.4.2.min.js"></script>
+<!-- script src="http://code.jquery.com/jquery-1.4.4.min.js"></script -->
 <script src="/static/Orbited.js"></script>
 <script>
 Orbited.settings.port = 9000;
-Orbited.settings.hostname = "65.96.165.156";
+Orbited.settings.hostname = "{{ site.domain }}";
 TCPSocket = Orbited.TCPSocket
 </script>
 <script src="/static/stomp.js"></script>
+<script src="/static/jquery.client.js"></script>
+<script src="/static/jquery.dnd-file-upload.js"></script>
 <script src="/static/jquery.jplayer.min.js"></script>
 <script>
 var stomp;
 $(document).ready(function () {
-	$("#jplayer").jPlayer({ swfPath: '/static/', volume: 50 });
 	stomp = new STOMPClient();
-	stop.onopen = function () {
-		alert("opening client");
-	};
 	stomp.onconnectedframe = function () {
-		$("<li><i>Connected to channel /mix/{{ group.name }} -- shit's sooo cash!</i></li>").appendTo('#stream');
+		$("<li><i>Connected to channel /mix/{{ group.name }} -- this shit is sooo cash!</i></li>").appendTo('#stream');
 		stomp.subscribe('/mix/{{ group.name }}');
 	};
         stomp.onmessageframe = function (frame) {
@@ -35,6 +33,32 @@ $(document).ready(function () {
 		}
 	}
 	stomp.connect('localhost', 61613);
+
+	$("#everything").dropzone({ url: '/music/upload2/' });
+
+        var noms = ["NOM nom nom", "nom NOM nom", "nom nom NOM"]
+        var nom_index = 0;
+        var nommer = null;
+        function do_the_nom() {
+            $('#drop').html(noms[nom_index++])
+            if (nom_index >= noms.length) { nom_index = 0; }
+	}
+
+        $.fn.dropzone.uploadStarted = function (fileIndex, file) {
+            if (nommer != null) { clearInterval(nommer); }
+            nommer = setInterval(do_the_nom, 250);
+	}
+
+        $.fn.dropzone.uploadFinished = function (fileIndex, file, timeDiff, event) {
+           clearInterval(nommer);
+           $('#drop').html("Yum, thanks!");
+	}
+
+	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
+		play_song(xhr.responseText);
+	}
+
+	$('#jplayer').jPlayer({ nativeSupport: true, swfPath: '/static/' });
 });
 function send_chat() {
 	$.post('./add/', {'msg': $('#message').val()});
@@ -51,16 +75,19 @@ function send_chat_enter(event) {
 </script>
 </head>
 <body>
+<div id="everything" style="height:100%">
+<div id="container" style="width:600px;margin:auto;">
 <div id="jplayer"></div>
+Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 <ul id="stream">
 </ul>
 Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()">
-<h4>Your music:</h4>
-<ul>
-{% for track in tracks %}
-<li>{{ track.artist }} - {{ track.title }} <input type="button" value="Play" onclick="play_song({{ track.id }})"></li>
+<ol>
+{% for h in history %}
+<li>{{ h.1 }}</li>
 {% endfor %}
-</ul>
-<input type="button" value="Stop (just me)" onclick="$('#jplayer').jPlayer('stop')">
+</ol>
+</div>
+</div>
 </body>
 </html>
