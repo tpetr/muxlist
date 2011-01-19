@@ -1,7 +1,7 @@
 # Django settings for muxlist project.
 import os, sys
 
-ROOT_PATH = os.path.abspath("%s/../" % os.path.dirname(__file__))
+ROOT_PATH = os.path.abspath("%s/../../" % os.path.dirname(__file__))
 if os.path.join(ROOT_PATH, 'lib/') not in sys.path:
     sys.path.insert(0, os.path.join(ROOT_PATH, 'lib/'))
 
@@ -13,13 +13,6 @@ ADMINS = (
 )
 
 MANAGERS = ADMINS
-
-DATABASE_ENGINE = ''           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
-DATABASE_NAME = ''             # Or path to database file if using sqlite3.
-DATABASE_USER = ''             # Not used with sqlite3.
-DATABASE_PASSWORD = ''         # Not used with sqlite3.
-DATABASE_HOST = ''             # Set to empty string for localhost. Not used with sqlite3.
-DATABASE_PORT = ''             # Set to empty string for default. Not used with sqlite3.
 
 DATABASES = {
     'default': {
