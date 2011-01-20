@@ -1,9 +1,9 @@
-__ALL__ = ('DATABASES', 'MEDIA_URL')
+__ALL__ = ('DATABASES', 'MEDIA_URL', 'HOSTNAME')
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'muxlist'
+        'NAME': 'muxlist',
         'USER': 'audbly',
         'PASSWORD': 'BuddyTheCat',
     },

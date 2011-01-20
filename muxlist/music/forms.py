@@ -34,7 +34,7 @@ class UploadForm2(forms.Form):
                 fp.write(chunk)
             fp.close()
 
-            tl = TrackLocation(url="http://cambridge.tpetr.net:8000/media/music/%s.mp3" % mp3_hash)
+            tl = TrackLocation(url="%smusic/%s.mp3" % (settings.MEDIA_URL, mp3_hash))
 
             artist_name, album_name, track_name, year, hash = get_track_data_from_file(filename)
 

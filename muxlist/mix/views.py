@@ -35,5 +35,5 @@ def add_song(request, group_name):
     track = Track.objects.get(id=request.REQUEST['id'])
     msg = json.dumps({'type': 'song', 'user': request.user.username, 'artist': track.artist.name, 'title': track.title, 'url': track.get_location().url})
     conn.send(msg, destination='/mix/%s' % group_name)
-    r.lpush('mix_%s' % group_name, json.dumps([track.id, str(track.__unicode__())]))
+    #r.lpush('mix_%s' % group_name, json.dumps([track.id, str(track.__unicode__())]))
     return HttpResponse('ok')
