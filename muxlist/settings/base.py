@@ -88,3 +88,5 @@ INSTALLED_APPS = (
 AUTH_PROFILE_MODULE = 'account.UserProfile'
 
 LOGIN_URL = '/account/login'
+
+HOSTNAME = 'localhost'

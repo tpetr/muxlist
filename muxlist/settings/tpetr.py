@@ -10,3 +10,5 @@ DATABASES = {
 }
 
 MEDIA_URL = 'http://muxli.st/media/'
+
+HOSTNAME = 'muxli.st'
