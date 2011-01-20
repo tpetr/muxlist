@@ -16,7 +16,7 @@ def index(request, group_name):
        return HttpResponseRedirect('/account/login?next=%s' % request.path)
     entries = group.entries.all()
     form = UploadForm()
-    return render_to_response('mix/group.html', {'group': group, 'entries': entries, 'form': form, 'user': request.user, 'tracks': request.user.get_profile().uploaded_tracks.all(), 'hostname': HOSTNAME})
+    return render_to_response('mix/group.html', {'group': group, 'entries': entries, 'form': form, 'user': request.user, 'hostname': HOSTNAME})
 
 def add_message(request, group_name):
     conn = stomp.Connection()
