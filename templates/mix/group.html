@@ -34,6 +34,7 @@ $(document).ready(function () {
 	}
 	stomp.connect('localhost', 61613);
 
+{% if user.is_authenticated %}
 	$("#everything").dropzone({ url: '/music/upload2/' });
 
         var noms = ["NOM nom nom", "nom NOM nom", "nom nom NOM"]
@@ -57,6 +58,7 @@ $(document).ready(function () {
 	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
 		play_song(xhr.responseText);
 	}
+{% endif %}
 
 	$('#jplayer').jPlayer({ nativeSupport: true, swfPath: '/static/' });
 });
@@ -78,10 +80,14 @@ function send_chat_enter(event) {
 <div id="everything" style="height:100%">
 <div id="container" style="width:600px;margin:auto;">
 <div id="jplayer"></div>
+{% if user.is_authenticated %}
 Logged in as {{ user }} <a href="/account/logout/">Logout</a>
+{% endif %}
 <ul id="stream">
 </ul>
+{% if user.is_authenticated %}
 Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()">
+{% endif %}
 <ol>
 {% for h in history %}
 <li>{{ h.1 }}</li>
