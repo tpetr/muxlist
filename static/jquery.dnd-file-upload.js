@@ -2,6 +2,14 @@
 
 	var opts = {};
 
+	$.fn.uploadSlice = function(start, end) {
+		opts.startSlice = start;
+		opts.endSlice = end;
+	}
+
+	$.fn.getURL = function () { return opts.url; }
+	$.fn.setURL = function (url) { opts.url = url; }
+
 	$.fn.dropzone = function(options) {
 
 		// Extend our default options with those provided.
@@ -45,7 +53,9 @@
 		numConcurrentUploads : 3,
 		printLogs : false,
 		// update upload speed every second
-		uploadRateRefreshTime : 1000
+		uploadRateRefreshTime : 1000,
+		sliceStart: -1,
+		sliceEnd: -1,
 	};
 
 	// invoked when new files are dropped
@@ -101,35 +111,65 @@
 		}
 	}
 
+	$.fn.startXHRAll = function (file, index) {
+		var xhr = new XMLHttpRequest();
+		var upload = xhr.upload;
+		upload.fileIndex = index;
+		upload.fileObj = file 
+		upload.downloadStartTime = new Date().getTime();
+		upload.currentStart = upload.downloadStartTime;
+		upload.currentProgress = 0;
+		upload.startData = 0;
+		xhr.open(opts.method, opts.url);
+		xhr.setRequestHeader("Cache-Control", "no-cache");
+		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+		xhr.setRequestHeader("X-File-Name", file.fileName);
+		xhr.setRequestHeader("X-File-Size", file.fileSize);
+		xhr.setRequestHeader("X-File-Type", file.type);
+		xhr.setRequestHeader("Content-Type", "multipart/form-data");
+		xhr.addEventListener('load', load2, false);
+		xhr.send(file);
+		return xhr;
+
+	}
+
+	$.fn.startXHRSlice = function(file, index, start, end) {
+		var slice = file.slice(start, end)
+		var xhr = new XMLHttpRequest();
+		var upload = xhr.upload;
+		upload.fileIndex = index;
+		upload.fileObj = slice
+		upload.downloadStartTime = new Date().getTime();
+		upload.currentStart = upload.downloadStartTime;
+		upload.currentProgress = 0;
+		upload.startData = 0;
+		xhr.open(opts.method, opts.url);
+		xhr.setRequestHeader("Cache-Control", "no-cache");
+		xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
+		xhr.setRequestHeader("X-File-Name", file.fileName);
+		xhr.setRequestHeader("X-File-Size", file.fileSize);
+		xhr.setRequestHeader("X-Slice-Size", (end-start));
+		xhr.setRequestHeader("X-Slice-Start", start);
+		xhr.setRequestHeader("X-Slice-End", end);
+		xhr.setRequestHeader("X-File-Type", file.type);
+		xhr.setRequestHeader("Content-Type", "multipart/form-data");
+		xhr.addEventListener('load', load2, false);
+		xhr.send(slice);
+		return xhr;
+	}
+
 	function uploadFiles(files) {
 		$.fn.dropzone.newFilesDropped();
+		var index = 0;
 		for ( var i = 0; i < files.length; i++) {
 			var file = files[i];
 
 			// create a new xhr object
-			var xhr = new XMLHttpRequest();
-			var upload = xhr.upload;
-			upload.fileIndex = i;
-			upload.fileObj = file;
-			upload.downloadStartTime = new Date().getTime();
-			upload.currentStart = upload.downloadStartTime;
-			upload.currentProgress = 0;
-			upload.startData = 0;
-
-			// add listeners
-			upload.addEventListener("progress", progress, false);
-			upload.addEventListener("load", load, false);
-
-			xhr.open(opts.method, opts.url);
-			xhr.setRequestHeader("Cache-Control", "no-cache");
-			xhr.setRequestHeader("X-Requested-With", "XMLHttpRequest");
-			xhr.setRequestHeader("X-File-Name", file.fileName);
-			xhr.setRequestHeader("X-File-Size", file.fileSize);
-			xhr.setRequestHeader("X-File-Type", file.type);
-			xhr.setRequestHeader("Content-Type", "multipart/form-data");
-			xhr.addEventListener('load', load2, false);
-			xhr.send(file);
-
+			if (opts.sliceStart > -1) {
+				$.fn.startXHRSlice(file, index++, opts.sliceStart, opts.sliceEnd)
+			} else {
+				$.fn.startXHRAll(file, index++);
+			}
 			$.fn.dropzone.uploadStarted(i, file);
 		}
 	}

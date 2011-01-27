@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 class Artist(models.Model):
     name = models.CharField(max_length=128)
@@ -26,7 +27,7 @@ class Track(models.Model):
     year = models.PositiveSmallIntegerField(blank=True, null=True)
     artist = models.ForeignKey(Artist, related_name='tracks', blank=True, null=True)
 
-    hash = models.CharField(max_length=32, blank=True, null=True)
+    uploaded_by = models.ManyToManyField(User, blank=True, related_name='uploaded_tracks')
 
     created_on = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True, auto_now_add=True)
@@ -40,6 +41,12 @@ class Track(models.Model):
 class TrackLocation(models.Model):
     url = models.URLField(max_length=128)
     track = models.ForeignKey(Track, related_name='locations')
+
+    size = models.PositiveIntegerField()
+    hash = models.CharField(max_length=32)
+    begin_hash = models.CharField(max_length=32)
+    middle_hash = models.CharField(max_length=32)
+    end_hash = models.CharField(max_length=32)
 
     active = models.BooleanField(default=True, blank=True)
 

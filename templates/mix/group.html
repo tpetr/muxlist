@@ -35,28 +35,51 @@ $(document).ready(function () {
 	stomp.connect('localhost', 61613);
 
 {% if user.is_authenticated %}
-	$("#everything").dropzone({ url: '/music/upload2/' });
-
-        var noms = ["NOM nom nom", "nom NOM nom", "nom nom NOM"]
-        var nom_index = 0;
-        var nommer = null;
-        function do_the_nom() {
-            $('#drop').html(noms[nom_index++])
-            if (nom_index >= noms.length) { nom_index = 0; }
-	}
-
-        $.fn.dropzone.uploadStarted = function (fileIndex, file) {
-            if (nommer != null) { clearInterval(nommer); }
-            nommer = setInterval(do_the_nom, 250);
-	}
-
-        $.fn.dropzone.uploadFinished = function (fileIndex, file, timeDiff, event) {
-           clearInterval(nommer);
-           $('#drop').html("Yum, thanks!");
-	}
+var file;
+	$("#everything").dropzone({ url: '/music/begin_slice/' });
 
 	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
-		play_song(xhr.responseText);
+		if (xhr.status == 200) {
+			if ($.fn.getURL() == '/music/begin_slice/') {
+				console.log("worked on first try");
+			} else {
+				console.log("we're good!");
+			}
+			$.fn.setURL('/music/begin_slice/');
+			play_song(xhr.responseText);
+			return;
+		}
+
+		if ($.fn.getURL() == '/music/begin_slice/') {
+			file = xhr.upload.fileObj;
+			if (xhr.status == 402) {
+				$.fn.setURL('/music/middle_slice/');
+				var size = file.fileSize;
+				console.log("trying next");
+				$.fn.startXHRSlice(file, xhr.upload.fileIndex + 1, Math.floor(size/2)-50, Math.floor(size/2)+50);
+				return;
+			} else if (xhr.status == 404) {
+				$.fn.setURL('/music/upload/');
+				console.log("trying all");
+				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
+				return;
+			}
+		}
+
+		if ($.fn.getURL() == '/music/middle_slice/') {
+			if (xhr.status == 402) {
+				$.fn.setURL('/music/end_slice/');
+				var size = file.fileSize;
+				console.log("trying next");
+				$.fn.startXHRSlice(file, xhr.upload.fileIndex + 1, size-100, size);
+				return;
+			} else if (xhr.status == 404) {
+				$.fn.setURL('/music/upload/');
+				console.log('trying all');
+				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
+				return;
+			}
+		}
 	}
 {% endif %}
 

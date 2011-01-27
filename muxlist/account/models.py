@@ -4,8 +4,7 @@ from django.contrib.auth.models import User
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
     parent = models.ForeignKey('self', blank=True, null=True)
-    uploaded_tracks = models.ManyToManyField('music.Track', blank=True, related_name='uploader')
-    favorite_tracks = models.ManyToManyField('music.Track', blank=True, related_name='favorited')
+    favorite_tracks = models.ManyToManyField('music.Track', blank=True, related_name='favorited_by')
 
     def __unicode__(self):
         return user.__unicode__(self)
