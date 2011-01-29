@@ -48,6 +48,20 @@ def start_fcgi():
         run('%(manage)s runfcgi method=threaded socket=%(socket)s pidfile=%(pidfile)s' % env)
         run('chmod a+w %(socket)s' % env)
 
+def restart_fcgi_local():
+    'Restart the Django FastCGI daemon locally'
+
+    local_setup()
+
+    if not os.path.exists(env.pidfile):
+        warn('PID file does not exist (%(pidfile)s), you may have to manually kill the fcgi process' % env)
+    else:
+        local('kill -term `cat %(pidfile)s`' % env)
+        local('rm %(pidfile)s' % env)
+
+    local('%(manage)s runfcgi method=threaded socket=%(socket)s pidfile=%(pidfile)s' % env)
+    local('chmod a+w %(socket)s' % env)
+
 def start_fcgi_local():
     'Start the Django FastCGI daemon locally'
 
