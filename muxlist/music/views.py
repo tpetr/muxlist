@@ -22,7 +22,6 @@ def begin_slice(request):
         form = SliceUploadForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             begin_hash = hashlib.md5(form.cleaned_data['file'].read(100)).hexdigest()
-            print "size = %s, begin_hash = %s" % (request.META['HTTP_X_FILE_SIZE'], begin_hash)
             try:
                 tl = TrackLocation.objects.get(begin_hash=begin_hash, size=request.META['HTTP_X_FILE_SIZE'])
                 if request.user in tl.track.uploaded_by.all():
@@ -84,7 +83,7 @@ def upload(request):
             track = form.save(user=request.user)
             return HttpResponse(track.id)
         else:
-            return HttpResponse("invalid", status=500)
+            return HttpResponse("invalid: %s" % (', '.join(form.errors)), status=500)
     else:
         form = UploadForm()
 

@@ -28,18 +28,22 @@ $(document).ready(function () {
 			$('<li><b>' + data.user + '</b>: ' + data.message + '</li>').appendTo('#stream');
 		} else if (data.type == 'song') {
 			$('<li><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
-			$('#jplayer').jPlayer('stop').jPlayer('setFile', data.url).jPlayer('play');
+			var jp = $('#jplayer');
+			jp.jPlayer('stop');
+			jp.jPlayer('setFile', data.url);
+			setTimeout('$("#jplayer").jPlayer("play")', 1000);
 			
 		}
 	}
 	stomp.connect('localhost', 61613);
 
 {% if user.is_authenticated %}
-var file;
 	$("#everything").dropzone({ url: '/music/begin_slice/' });
 
 	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
+		var file = $.fn.getLastFile();
 		if (xhr.status == 200) {
+			$.fn.clearLastFile();
 			if ($.fn.getURL() == '/music/begin_slice/') {
 				console.log("worked on first try");
 			} else {
@@ -51,7 +55,6 @@ var file;
 		}
 
 		if ($.fn.getURL() == '/music/begin_slice/') {
-			file = xhr.upload.fileObj;
 			if (xhr.status == 402) {
 				$.fn.setURL('/music/middle_slice/');
 				var size = file.fileSize;
@@ -59,8 +62,9 @@ var file;
 				$.fn.startXHRSlice(file, xhr.upload.fileIndex + 1, Math.floor(size/2)-50, Math.floor(size/2)+50);
 				return;
 			} else if (xhr.status == 404) {
+				console.log(file);
 				$.fn.setURL('/music/upload/');
-				console.log("trying all");
+				console.log("trying all from begin");
 				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
 				return;
 			}
@@ -83,7 +87,8 @@ var file;
 	}
 {% endif %}
 
-	$('#jplayer').jPlayer({ nativeSupport: true, swfPath: '/static/' });
+	$('#jplayer').jPlayer({ nativeSupport: !$.browser.webkit, swfPath: '/static/', preload: 'auto', 'errorAlerts': true, 'warningAlerts': true });
+	console.log(!$.browser.webkit);
 });
 function send_chat() {
 	$.post('./add/', {'msg': $('#message').val()});

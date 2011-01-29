@@ -26,6 +26,18 @@ def prod():
     env.target = 'prod'
     env.ready = True
 
+def local_setup():
+    'Points commands to local server'
+    env.hosts = ['localhost']
+    env.directory = os.path.abspath(os.path.dirname(__file__))
+    env.manage = os.path.join(env.directory, 'muxlist/manage.py')
+    env.socket = os.path.join(env.directory, 'bin/fastcgi.socket')
+    env.pidfile = os.path.join(env.directory, 'etc/django.pid')
+    env.nginx = os.path.join(env.directory, 'etc/nginx/')
+    env.target = 'local'
+    env.ready = True
+
+
 @dest_required
 def start_fcgi():
     'Start the Django FastCGI daemon'
@@ -35,6 +47,29 @@ def start_fcgi():
     else:
         run('%(manage)s runfcgi method=threaded socket=%(socket)s pidfile=%(pidfile)s' % env)
         run('chmod a+w %(socket)s' % env)
+
+def start_fcgi_local():
+    'Start the Django FastCGI daemon locally'
+
+    local_setup()
+
+    if os.path.exists(env.pidfile):
+        abort('PID file already exists (%(pidfile)s), fcgi already running?' % env)
+    else:
+        local('%(manage)s runfcgi method=threaded socket=%(socket)s pidfile=%(pidfile)s' % env)
+        local('chmod a+w %(socket)s' % env)
+
+def stop_fcgi_local():
+    'Stop the Django FastCGI daemon locally'
+
+    local_setup()
+
+    if not os.path.exists(env.pidfile):
+        warn('PID file does not exist (%(pidfile)s), you may have to manually kill the fcgi process' % env)
+    else:
+        local('kill -term `cat %(pidfile)s`' % env)
+        local('rm %(pidfile)s' % env)
+
 
 @dest_required
 def stop_fcgi():

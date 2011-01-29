@@ -11,12 +11,14 @@ import hashlib
 import settings
 import os
 
+AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3')
+
 class SliceUploadForm(forms.Form):
     file = forms.FileField()
     group = forms.ModelChoiceField(label="", queryset=Group.objects.all(), widget=forms.HiddenInput(), required=False)
 
     def clean_file(self):
-        if self.cleaned_data['file'].content_type != 'audio/mp3':
+        if self.cleaned_data['file'].content_type not in AUDIO_MIMETYPES:
             raise forms.ValidationError("Must be MP3")
         return self.cleaned_data['file']
 
@@ -25,7 +27,7 @@ class UploadForm(forms.Form):
     group = forms.ModelChoiceField(label="", queryset=Group.objects.all(), widget=forms.HiddenInput(), required=False)
 
     def clean_file(self):
-        if self.cleaned_data['file'].content_type != 'audio/mp3':
+        if self.cleaned_data['file'].content_type not in AUDIO_MIMETYPES:
             raise forms.ValidationError('Must be MP3')
         return self.cleaned_data['file']
 

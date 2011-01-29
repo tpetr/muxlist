@@ -2,16 +2,15 @@
 
 	var opts = {};
 
-	$.fn.uploadSlice = function(start, end) {
-		opts.startSlice = start;
-		opts.endSlice = end;
-	}
+	var last_file = null;
 
 	$.fn.getURL = function () { return opts.url; }
 	$.fn.setURL = function (url) { opts.url = url; }
 
-	$.fn.dropzone = function(options) {
+	$.fn.getLastFile = function () { return last_file; }
+	$.fn.clearLastFile = function () { last_file = null; }
 
+	$.fn.dropzone = function(options) {
 		// Extend our default options with those provided.
 		opts = $.extend( {}, $.fn.dropzone.defaults, options);
 
@@ -53,9 +52,7 @@
 		numConcurrentUploads : 3,
 		printLogs : false,
 		// update upload speed every second
-		uploadRateRefreshTime : 1000,
-		sliceStart: -1,
-		sliceEnd: -1,
+		uploadRateRefreshTime : 1000
 	};
 
 	// invoked when new files are dropped
@@ -134,7 +131,12 @@
 	}
 
 	$.fn.startXHRSlice = function(file, index, start, end) {
-		var slice = file.slice(start, end)
+		var slice;
+		if (file.slice) {
+			slice = file.slice(start, end)
+		} else {
+			slice = file.getAsBinary().slice(start, end);
+		}
 		var xhr = new XMLHttpRequest();
 		var upload = xhr.upload;
 		upload.fileIndex = index;
@@ -154,7 +156,11 @@
 		xhr.setRequestHeader("X-File-Type", file.type);
 		xhr.setRequestHeader("Content-Type", "multipart/form-data");
 		xhr.addEventListener('load', load2, false);
-		xhr.send(slice);
+		if (!file.slice) {
+			xhr.sendAsBinary(slice);
+		} else {
+			xhr.send(slice);
+		}
 		return xhr;
 	}
 
@@ -165,11 +171,8 @@
 			var file = files[i];
 
 			// create a new xhr object
-			if (opts.sliceStart > -1) {
-				$.fn.startXHRSlice(file, index++, opts.sliceStart, opts.sliceEnd)
-			} else {
-				$.fn.startXHRAll(file, index++);
-			}
+			last_file = file
+			$.fn.startXHRSlice(file, index++, 0, 100)
 			$.fn.dropzone.uploadStarted(i, file);
 		}
 	}
