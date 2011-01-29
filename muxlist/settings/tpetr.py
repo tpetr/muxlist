@@ -1,4 +1,4 @@
-__ALL__ = ('DATABASES', 'MEDIA_URL', 'HOSTNAME')
+__ALL__ = ('DATABASES', 'MEDIA_URL', 'HOSTNAME', 'DEBUG')
 
 DATABASES = {
     'default': {
@@ -12,3 +12,5 @@ DATABASES = {
 MEDIA_URL = 'http://muxli.st/media/'
 
 HOSTNAME = 'muxli.st'
+
+DEBUG = False
