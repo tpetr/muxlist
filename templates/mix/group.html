@@ -27,7 +27,7 @@ $(document).ready(function () {
 		stomp.subscribe('/mix/{{ group.name }}');
                 stomp.subscribe('/user/{{ user.id }}');
 		// why??
-                setTimeout("comet_ready()", 50)
+                setTimeout("comet_ready()", 100)
 	};
 	stomp.onreceiptframe = function (frame) {
 		data = JSON.parse(frame.body)
@@ -43,7 +43,13 @@ $(document).ready(function () {
 			var jp = $('#jplayer');
 			jp.jPlayer('stop');
 			jp.jPlayer('setFile', data.url);
-			setTimeout('$("#jplayer").jPlayer("play")', 1000);
+			jp.jPlayer('load');
+                        if ('time' in data) {
+				console.log("time:", data.time)
+				jp.jPlayer("play", data.time)
+			} else {
+				jp.jPlayer("play");
+			}
 			
 		} else if (data.type == 'debug') {
 			$('<li><i>DEBUG: ' + data.msg + '</i></li>').appendTo('#stream')

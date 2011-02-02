@@ -27,6 +27,8 @@ def debug_enqueue(group_name, user, track):
 def send_current_song(group_name, user):
     print "send current song to %s" % user
     r = redis.Redis(host='localhost', port=6379, db=0)
+    if not r.exists('%s_current' % group_name):
+        return
 
     track = Track.objects.get(id=r.get('%s_current' % group_name))
     playing_user = User.objects.get(id=r.get('%s_current_user' % group_name))
@@ -36,7 +38,7 @@ def send_current_song(group_name, user):
     conn.start()
     conn.connect()
     conn.subscribe(destination='/user/%s' % user.id, ack='auto')
-    msg = json.dumps({'type': 'song', 'user': playing_user.username, 'artist': track.artist.name, 'title': track.title, 'url': track.get_location().url})
+    msg = json.dumps({'type': 'song', 'user': playing_user.username, 'artist': track.artist.name, 'title': track.title, 'url': track.get_location().url, 'time': track.length - r.ttl('%s_current' % group_name)})
     conn.send(msg, destination='/user/%s' % user.id)
 
 def send_next_song(group_name):
@@ -64,7 +66,7 @@ def send_next_song(group_name):
 
     r.set('%s_current' % group_name, track_id)
     r.set('%s_current_user' % group_name, user_id)
-    r.expire('%s_current' % group_name, 30)
+    r.expire('%s_current' % group_name, Track.objects.get(id=track_id).length)
 
     user = User.objects.get(id=user_id)
     track = Track.objects.get(id=track_id)
@@ -87,13 +89,12 @@ def tu(sender, **kwargs):
     r.rpush('%s_%s_queue' % (group_name, user.id), track.id)
     debug_enqueue(group_name, user, track)
     r.sadd('%s_users' % group_name, user.id)
-    if (not r.exists('%s_current' % group_name)):
+    if (r.ttl('%s_current' % group_name) == -1):
         send_next_song(group_name)
 
 def next_song(request, group_name):
     r = redis.Redis(host='localhost', port=6379, db=0)
     if r.ttl('%s_current' % group_name) > 0:
-        print "ttl = %s" % r.ttl('%s_current' % group_name)
         raise Http404()
 
     send_next_song(group_name)
@@ -102,7 +103,10 @@ def next_song(request, group_name):
 
 def current_song(request, group_name):
     r = redis.Redis(host='localhost', port=6379, db=0)
-    send_current_song(group_name, request.user)
+    if r.ttl('%s_current' % group_name) > 0:
+        send_current_song(group_name, request.user)
+    else:
+        send_next_song(group_name)
     return HttpResponse()
 
 def force_next(request, group_name):

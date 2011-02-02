@@ -26,6 +26,7 @@ class Track(models.Model):
     album = models.ForeignKey(Album, related_name='tracks', blank=True, null=True)
     year = models.PositiveSmallIntegerField(blank=True, null=True)
     artist = models.ForeignKey(Artist, related_name='tracks', blank=True, null=True)
+    length = models.PositiveSmallIntegerField()
 
     uploaded_by = models.ManyToManyField(User, blank=True, related_name='uploaded_tracks')
 

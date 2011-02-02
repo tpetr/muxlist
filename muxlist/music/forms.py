@@ -11,7 +11,9 @@ import hashlib
 import settings
 import os
 
-AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3')
+import mad
+
+AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3', 'audio/mpeg3')
 
 class SliceUploadForm(forms.Form):
     file = forms.FileField()
@@ -57,6 +59,9 @@ class UploadForm(forms.Form):
                 fp.write(chunk)
             fp.close()
 
+            mf = mad.MadFile(filename)
+            length = mf.total_time() / 1000
+
             tl = TrackLocation(url="%smusic/%s.mp3" % (settings.MEDIA_URL, full_hash), size=len(f), begin_hash=begin_hash, middle_hash=middle_hash, end_hash=end_hash, hash=full_hash)
 
             artist_name, album_name, track_name, year, hash = get_track_data_from_file(filename)
@@ -72,7 +77,7 @@ class UploadForm(forms.Form):
             else:
                 album = None
 
-            track = Track.objects.get_or_create(title=track_name, album=album, year=year, artist=artist)[0]
+            track = Track.objects.get_or_create(title=track_name, album=album, year=year, artist=artist, length=length)[0]
 
             tl.track = track
             tl.save()
