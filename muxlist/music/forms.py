@@ -78,10 +78,12 @@ class UploadForm(forms.Form):
             if album_name != '':
                 album, created = Album.objects.get_or_create(artist=artist, name=album_name)
                 if created:
-                    r = urllib2.urlopen('http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=72553de16666cad1c8f7e319292e9123&artist=%s&album=%s' % (artist_name.replace(' ', '%20'), album_name.replace(' ', '%20')))
-                    bs = BeautifulSoup(r.read())
-                    album.image = bs.album.image.nextSibling.nextSibling.nextSibling.nextSibling.contents[0]
-                    album.save()
+                    try:
+                        r = urllib2.urlopen('http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=72553de16666cad1c8f7e319292e9123&artist=%s&album=%s' % (artist_name.replace(' ', '%20'), album_name.replace(' ', '%20')))
+                        bs = BeautifulSoup(r.read())
+                        album.image = bs.album.image.nextSibling.nextSibling.nextSibling.nextSibling.contents[0]
+                        album.save()
+                    except: pass
             else:
                 album = None
 
