@@ -13,6 +13,9 @@ import os
 
 import mad
 
+import urllib2
+from BeautifulSoup import BeautifulSoup
+
 AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3', 'audio/mpeg3')
 
 class SliceUploadForm(forms.Form):
@@ -73,7 +76,12 @@ class UploadForm(forms.Form):
                 artist = None
             
             if album_name != '':
-                album = Album.objects.get_or_create(artist=artist, name=album_name)[0]
+                album, created = Album.objects.get_or_create(artist=artist, name=album_name)
+                if created:
+                    r = urllib2.urlopen('http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=b25b959554ed76058ac220b7b2e0a026&artist=%s&album=%s')
+                    bs = BeautifulSoup(r.read())
+                    album.image = bs.image[1]
+                    album.save()
             else:
                 album = None
 

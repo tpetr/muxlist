@@ -15,6 +15,8 @@ class Album(models.Model):
     artist = models.ForeignKey(Artist, related_name='albums')
     year = models.PositiveSmallIntegerField(blank=True, null=True)
 
+    image = models.URLField(max_length=128, blank=True, null=True)
+
     created_on = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True, auto_now_add=True)
 

@@ -42,7 +42,7 @@ $(document).ready(function () {
 			$('<li><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
 			var jp = $('#jplayer');
 			jp.jPlayer('stop');
-			jp.jPlayer('setFile', data.url);
+			jp.jPlayer('setMedia',{mp3: data.url});
 			jp.jPlayer('load');
                         if ('time' in data) {
 				console.log("time:", data.time)
@@ -112,7 +112,7 @@ $(document).ready(function () {
 	}
 
 	$('#jplayer').jPlayer({
-		ended: function (event) { alert('ended'); },
+		ended: song_ended,
 		swfPath: '/static/',
 		solution: $.browser.webkit ? 'flash, html' : 'html, flash',
                 supplied: 'mp3',
