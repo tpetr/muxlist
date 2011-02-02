@@ -38,7 +38,7 @@ def send_current_song(group_name, user):
     conn.start()
     conn.connect()
     conn.subscribe(destination='/user/%s' % user.id, ack='auto')
-    msg = json.dumps({'type': 'song', 'user': playing_user.username, 'artist': track.artist.name, 'title': track.title, 'url': track.get_location().url, 'time': track.length - r.ttl('%s_current' % group_name)})
+    msg = json.dumps({'type': 'song', 'user': playing_user.username, 'artist': track.artist.name, 'album': track.album.name, 'cover_art': track.album.image, 'title': track.title, 'url': track.get_location().url, 'time': track.length - r.ttl('%s_current' % group_name)})
     conn.send(msg, destination='/user/%s' % user.id)
 
 def send_next_song(group_name):
@@ -76,7 +76,7 @@ def send_next_song(group_name):
     conn.start()
     conn.connect()
     conn.subscribe(destination='/mix/%s' % group_name, ack='auto')
-    msg = json.dumps({'type': 'song', 'user': user.username, 'artist': track.artist.name, 'title': track.title, 'url': track.get_location().url})
+    msg = json.dumps({'type': 'song', 'user': user.username, 'artist': track.artist.name, 'album': track.album.name, 'cover_art': track.album.image, 'title': track.title, 'url': track.get_location().url})
     conn.send(msg, destination='/mix/%s' % group_name)
 
 @receiver(track_uploaded, sender=None)

@@ -39,7 +39,11 @@ $(document).ready(function () {
 		if (data.type == 'chat') {
 			$('<li><b>' + data.user + '</b>: ' + data.message + '</li>').appendTo('#stream');
 		} else if (data.type == 'song') {
-			$('<li><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
+                        if (data.cover_art) {
+				$('<li><div style="height:174px"><img src="' + data.cover_art + '" style="float:left;width:174px;height:174px;"><h1>' + data.title + '</h1><h2>by ' + data.artist + '</h2><h3>from ' + data.user + '</h3></div>').appendTo('#stream');
+			} else {
+				$('<li><div><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
+			}
 			var jp = $('#jplayer');
 			jp.jPlayer('stop');
 			jp.jPlayer('setMedia',{mp3: data.url});
