@@ -9,6 +9,8 @@ from shutil import copyfile
 from muxlist.music.decorators import move_rawdata_to_files
 from muxlist.music.models import TrackLocation
 
+from muxlist.music.signals import track_uploaded
+
 @login_required
 def index(request):
     profile = request.user.get_profile()
@@ -25,7 +27,8 @@ def begin_slice(request):
             try:
                 tl = TrackLocation.objects.get(begin_hash=begin_hash, size=request.META['HTTP_X_FILE_SIZE'])
                 if request.user in tl.track.uploaded_by.all():
-                    return HttpResponse(tl.track.id)
+                    track_uploaded.send(sender=None, track=tl.track, group=form.cleaned_data['group'], user=request.user)
+                    return HttpResponse()
             except TrackLocation.DoesNotExist:
                 return HttpResponse(status=404)
             request.session['begin_hash'] = begin_hash
@@ -46,7 +49,8 @@ def middle_slice(request):
             try:
                 tl = TrackLocation.objects.get(begin_hash=begin_hash, middle_hash=middle_hash, size=request.META['HTTP_X_FILE_SIZE'])
                 if request.user in tl.track.uploaded_by.all():
-                    return HttpResponse(tl.track.id)
+                    track_uploaded.send(sender=None, track=tl.track, group=form.cleaned_data['group'], user=request.user)
+                    return HttpResponse()
             except TrackLocation.DoesNotExist:
                 return HttpResponse(status=404)
             request.session['middle_hash'] = middle_hash
@@ -67,7 +71,8 @@ def end_slice(request):
             print "size = %s, begin_hash=%s, middle_hash = %s, end_hash = %s" % (request.META['HTTP_X_FILE_SIZE'], begin_hash, middle_hash, end_hash)
             try:
                 tl = TrackLocation.objects.get(begin_hash=begin_hash, middle_hash=middle_hash, end_hash=end_hash, size=request.META['HTTP_X_FILE_SIZE'])
-                return HttpResponse(tl.track.id)
+                track_uploaded.send(sender=None, track=tl.track, group=form.cleaned_data['group'], user=request.user)
+                return HttpResponse()
             except TrackLocation.DoesNotExist: pass
             return HttpResponse(status=404)
         else:
@@ -81,7 +86,8 @@ def upload(request):
         form = UploadForm(data=request.POST, files=request.FILES)
         if form.is_valid():
             track = form.save(user=request.user)
-            return HttpResponse(track.id)
+            track_uploaded.send(sender=None, track=track, group=form.cleaned_data['group'], user=request.user)
+            return HttpResponse()
         else:
             return HttpResponse("invalid: %s" % (', '.join(form.errors)), status=500)
     else:

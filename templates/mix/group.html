@@ -16,14 +16,26 @@ TCPSocket = Orbited.TCPSocket
 <script src="/static/jquery.jplayer.min.js"></script>
 <script>
 var stomp;
+function comet_ready() {
+	console.log("ready");
+	$.post('./current/');
+}
 $(document).ready(function () {
 	stomp = new STOMPClient();
 	stomp.onconnectedframe = function () {
 		$("<li><i>Connected to channel /mix/{{ group.name }} -- this shit is sooo cash!</i></li>").appendTo('#stream');
 		stomp.subscribe('/mix/{{ group.name }}');
+                stomp.subscribe('/user/{{ user.id }}');
+		// why??
+                setTimeout("comet_ready()", 50)
 	};
+	stomp.onreceiptframe = function (frame) {
+		data = JSON.parse(frame.body)
+                console.log(frame)
+	}
         stomp.onmessageframe = function (frame) {
 		data = JSON.parse(frame.body);
+                console.log("message", data)
 		if (data.type == 'chat') {
 			$('<li><b>' + data.user + '</b>: ' + data.message + '</li>').appendTo('#stream');
 		} else if (data.type == 'song') {
@@ -33,6 +45,8 @@ $(document).ready(function () {
 			jp.jPlayer('setFile', data.url);
 			setTimeout('$("#jplayer").jPlayer("play")', 1000);
 			
+		} else if (data.type == 'debug') {
+			$('<li><i>DEBUG: ' + data.msg + '</i></li>').appendTo('#stream')
 		}
 	}
 	stomp.connect('localhost', 61613);
@@ -50,7 +64,6 @@ $(document).ready(function () {
 				console.log("we're good!");
 			}
 			$.fn.setURL('/music/begin_slice/');
-			play_song(xhr.responseText);
 			return;
 		}
 
@@ -87,15 +100,22 @@ $(document).ready(function () {
 	}
 {% endif %}
 
-	$('#jplayer').jPlayer({ nativeSupport: !$.browser.webkit, swfPath: '/static/', preload: 'auto', 'errorAlerts': true, 'warningAlerts': true });
-	console.log(!$.browser.webkit);
+	function song_ended() {
+                console.log("requesting next");
+		$.post('./next/')
+	}
+
+	$('#jplayer').jPlayer({
+		ended: function (event) { alert('ended'); },
+		swfPath: '/static/',
+		solution: $.browser.webkit ? 'flash, html' : 'html, flash',
+                supplied: 'mp3',
+		preload: 'auto'
+	});
 });
 function send_chat() {
 	$.post('./add/', {'msg': $('#message').val()});
 	$('#message').val('').focus();
-}
-function play_song(id) {
-	$.post('./song/', {'id': id});
 }
 function send_chat_enter(event) {
 	if (event.keyCode == 13) {
