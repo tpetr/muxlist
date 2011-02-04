@@ -16,16 +16,16 @@ TCPSocket = Orbited.TCPSocket
 <script src="/static/jquery.jplayer.min.js"></script>
 <script>
 var stomp;
-function comet_ready() {
-	console.log("ready");
-	$.post('./current/');
-}
+var comet_ready;
 $(document).ready(function () {
+	comet_ready = function() {
+		console.log("ready");
+		$.post('./current/', function (data) { console.log(data); stomp.onmessageframe({'body': data});});
+	}
 	stomp = new STOMPClient();
 	stomp.onconnectedframe = function () {
-		$("<li><i>Connected to channel /mix/{{ group.name }} -- this shit is sooo cash!</i></li>").appendTo('#stream');
-		stomp.subscribe('/mix/{{ group.name }}');
-                stomp.subscribe('/user/{{ user.id }}');
+		$("<li><i>thundercats are go</i></li>").appendTo('#stream');
+		stomp.subscribe('/group/{{ group.id }}');
 		// why??
                 setTimeout("comet_ready()", 100)
 	};
@@ -37,17 +37,18 @@ $(document).ready(function () {
 		data = JSON.parse(frame.body);
                 console.log("message", data)
 		if (data.type == 'chat') {
-			$('<li><b>' + data.user + '</b>: ' + data.message + '</li>').appendTo('#stream');
-		} else if (data.type == 'song') {
-                        if (data.cover_art) {
-				$('<li><div style="height:174px"><img src="' + data.cover_art + '" style="float:left;width:174px;height:174px;"><h1>' + data.title + '</h1><h2>by ' + data.artist + '</h2><h3>from ' + data.user + '</h3></div>').appendTo('#stream');
-			} else {
-				$('<li><div><b>' + data.user + '</b> is playing <b>' + data.artist + ' - ' + data.title + '</b></li>').appendTo('#stream');
+			$('<li><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
+		} else if (data.type == 'track') {
+			$('#current').html('');
+                        if (data.track.cover_art) {
+				$('<img src="' + data.track.cover_art + '" style="float:left;width:174px;height:174px;">').appendTo('#current')
 			}
+			$('<h1>' + data.track.title + '</h1><h2>on ' + data.track.album + '</h2><h2>by ' + data.track.artist + '</h2><h3>from ' + data.user + '</h3><div id="progress_outer"><div id="progress_inner"></div></div>').appendTo('#current');
+			$('<li><div><b>' + data.user + '</b> is playing <b>' + data.track.artist + ' - ' + data.track.title + '</b></li>').appendTo('#stream');
+			$('#current').fadeIn();
 			var jp = $('#jplayer');
 			jp.jPlayer('stop');
-			jp.jPlayer('setMedia',{mp3: data.url});
-			jp.jPlayer('load');
+			jp.jPlayer('setMedia',{mp3: data.track.url});
                         if ('time' in data) {
 				console.log("time:", data.time)
 				jp.jPlayer("play", data.time)
@@ -64,6 +65,10 @@ $(document).ready(function () {
 {% if user.is_authenticated %}
 	$("#everything").dropzone({ url: '/music/begin_slice/' });
 
+	$.fn.dropzone.uploadStarted = function () {
+		$('#uploading').html('<img src="/static/throbber.gif"> Uploading...');
+	}
+
 	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
 		var file = $.fn.getLastFile();
 		if (xhr.status == 200) {
@@ -74,6 +79,7 @@ $(document).ready(function () {
 				console.log("we're good!");
 			}
 			$.fn.setURL('/music/begin_slice/');
+			$('#uploading').html('')
 			return;
 		}
 
@@ -111,12 +117,19 @@ $(document).ready(function () {
 {% endif %}
 
 	function song_ended() {
+		$('#current').fadeOut();
                 console.log("requesting next");
 		$.post('./next/')
 	}
 
+var baz = true;
+	function update_progress(event) {
+		$('#progress_inner').css('width', event.jPlayer.status.currentPercentAbsolute + '%')
+	}
+
 	$('#jplayer').jPlayer({
 		ended: song_ended,
+		timeupdate: update_progress,
 		swfPath: '/static/',
 		solution: $.browser.webkit ? 'flash, html' : 'html, flash',
                 supplied: 'mp3',
@@ -127,30 +140,44 @@ function send_chat() {
 	$.post('./add/', {'msg': $('#message').val()});
 	$('#message').val('').focus();
 }
+function send_next() {
+	$.post('./force-next/');
+}
 function send_chat_enter(event) {
 	if (event.keyCode == 13) {
 		send_chat();
 	}
 }
 </script>
+<style>
+body { margin: 0; padding: 0; }
+h1, h2, h3 { margin: 0px; }
+#progress_outer { height:10px; width:200px; border:1px solid; background:white; }
+#progress_inner { height:10px; background: black; width: 0%; }
+</style>
 </head>
 <body>
 <div id="everything" style="height:100%">
 <div id="container" style="width:600px;margin:auto;">
 <div id="jplayer"></div>
+<div>
+muxlist // {{ group.name }}
 {% if user.is_authenticated %}
+<span style="float:right">
 Logged in as {{ user }} <a href="/account/logout/">Logout</a>
+</span>
+{% else %}
+<span style="float:right">
+<a href="/account/login?next=/mix/{{ group.name }}/">Login to add tracks</a>
+</span>
 {% endif %}
+</div>
+<div style="height:174px;border:1px solid;" id="current">Nothing queued</div>
 <ul id="stream">
 </ul>
 {% if user.is_authenticated %}
-Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()">
+Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading"></span>
 {% endif %}
-<ol>
-{% for h in history %}
-<li>{{ h.1 }}</li>
-{% endfor %}
-</ol>
 </div>
 </div>
 </body>

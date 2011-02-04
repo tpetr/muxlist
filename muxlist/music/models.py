@@ -40,6 +40,9 @@ class Track(models.Model):
     
     def __unicode__(self):
         return u"%s - %s" % (self.artist.name, self.title)
+
+    def __json__(self):
+        return {'title': self.title, 'album': (self.album and self.album.name) or '???', 'artist': (self.artist and self.artist.name) or '???', 'cover_art': (self.album and self.album.image) or None, 'url': self.get_location().url}
     
 class TrackLocation(models.Model):
     url = models.URLField(max_length=128)

@@ -1,6 +1,6 @@
 from django import forms
 from muxlist.music.models import Track, TrackLocation, Artist, Album
-from muxlist.mix.models import Group, PlaylistEntry
+from muxlist.mix.models import Group
 
 from muxlist.music.util import get_track_data_from_url, get_track_data_from_file
 
