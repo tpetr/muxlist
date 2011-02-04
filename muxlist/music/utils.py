@@ -1,6 +1,20 @@
 import urllib, urllib2
 from mutagen.easyid3 import EasyID3
 
+from boto.s3.connection import S3Connection, Key
+
+def _get_s3_connection():
+    return S3Connection('1GDBYBN31QAR4P85HQG2', 'rcU7fQs/fOys/lQIJcNPZ65bk7kpyGJb5POommIV')
+
+def upload_to_s3(fp, name):
+    conn = _get_s3_connection()
+    bucket = conn.create_bucket('muxlist')
+    k = Key(bucket)
+    k.key = name
+    k.set_contents_from_file(fp)
+    return k.generate_url(36000)
+
+
 def get_track_data_from_url(url):
     request = urllib2.Request(url)
 

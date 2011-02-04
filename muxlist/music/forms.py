@@ -2,7 +2,7 @@ from django import forms
 from muxlist.music.models import Track, TrackLocation, Artist, Album
 from muxlist.mix.models import Group
 
-from muxlist.music.util import get_track_data_from_url, get_track_data_from_file
+from muxlist.music.utils import get_track_data_from_url, get_track_data_from_file, upload_to_s3
 
 from django.db.models import Max
 
@@ -56,16 +56,12 @@ class UploadForm(forms.Form):
             tl = TrackLocation.objects.get(hash=full_hash, size=len(f))
             track = tl.track
         except TrackLocation.DoesNotExist:
-            filename = os.path.join(settings.MEDIA_ROOT, 'music/%s.mp3' % full_hash)
-            fp = open(filename, 'wb+')
-            for chunk in f.chunks():
-                fp.write(chunk)
-            fp.close()
+            url = music_utils.upload_to_s3(f, full_hash)
 
             mf = mad.MadFile(filename)
             length = mf.total_time() / 1000
 
-            tl = TrackLocation(url="%smusic/%s.mp3" % (settings.MEDIA_URL, full_hash), size=len(f), begin_hash=begin_hash, middle_hash=middle_hash, end_hash=end_hash, hash=full_hash)
+            tl = TrackLocation(url=url, size=len(f), begin_hash=begin_hash, middle_hash=middle_hash, end_hash=end_hash, hash=full_hash)
 
             artist_name, album_name, track_name, year, hash = get_track_data_from_file(filename)
 
