@@ -40,8 +40,9 @@ $(document).ready(function () {
 			$('<li><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
 		} else if (data.type == 'track') {
 			$('#current').html('');
+			$('#cover_art').attr('src', '');
                         if (data.track.cover_art) {
-				$('<img src="' + data.track.cover_art + '" style="float:left;width:174px;height:174px;">').appendTo('#current')
+				$('#cover_art').attr('src', data.track.cover_art);
 			}
 			$('<h1>' + data.track.title + '</h1><h2>on ' + data.track.album + '</h2><h2>by ' + data.track.artist + '</h2><h3>from ' + data.user + '</h3><div id="progress_outer"><div id="progress_inner"></div></div>').appendTo('#current');
 			$('<li><div><b>' + data.user + '</b> is playing <b>' + data.track.artist + ' - ' + data.track.title + '</b></li>').appendTo('#stream');
@@ -172,7 +173,7 @@ Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 </span>
 {% endif %}
 </div>
-<div style="height:174px;border:1px solid;" id="current">Nothing queued</div>
+<div style="height:174px;border:1px solid;"><img id="cover_art" style="float:left"><div id="current" style="float:left">Nothing queued</div></div>
 <ul id="stream">
 </ul>
 {% if user.is_authenticated %}
