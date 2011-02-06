@@ -17,16 +17,18 @@
 		url("/static/fonts/lanenar_-webfont.svg#filename") format("svg");
 }
 body {
-	background:url(/static/tapedeck.jpg) center;
+	background:black url(/static/tapedeck.jpg) center;
 }
 #main {
 	width:500px;
 	height:250px;
 	margin:auto;
-	margin-top:200px;
 	color:white;
-	background:black;
+	background: black;
+	background: rgba(0,0,0,0.7);
 	text-align:center;
+	-moz-border-radius: 30px;
+	border-radius: 30px;
 }
 #attribution {
 	position: fixed;
@@ -37,19 +39,41 @@ body {
 #attribution a {
 	color:white;
 }
-h1 { font-size:70px; }
+h1 { font-size:70px; line-height: 100px; }
 h2 { font-size:30px; }
 h1, h2 {
 	color: white;
 	font-family: "lane";
+	margin:0;
+	padding:0;
 }
 </style>
+<script src="/static/jquery-1.4.2.min.js"></script>
 <body>
 <div id="main">
 <h1>muxlist</h1>
 <h2>the realtime collaborative playlist</h2>
+<br><br>
 <h2>coming soon</h2>
 </div>
 <span id="attribution">Picture by the talented <a href="http://www.flickr.com/people/detune/" target="_blank">Dennis Beentjes</a></span>
+<script type="text/javascript">
+function valign() {
+	$('#main').css('margin-top', (($(window).height() / 2) - 125) + 'px')
+}
+valign();
+$(window).resize(valign);
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-2869175-16']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
 </body>
 </html>
