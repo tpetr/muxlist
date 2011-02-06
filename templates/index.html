@@ -8,14 +8,24 @@
 <![endif]-->
 </head>
 <style>
+@font-face {
+	font-family: 'lane';
+	src: url('/static/fonts/lanenar_-webfont.eot');
+	src: local("☺"),
+    		url("/static/fonts/lanenar_-webfont.woff") format("woff"),
+		url("/static/fonts/lanenar_-webfont.otf") format("opentype"),
+		url("/static/fonts/lanenar_-webfont.svg#filename") format("svg");
+}
 body {
 	background:url(/static/tapedeck.jpg) center;
 }
 #main {
-	margin-top:200px;
-	width:300px;
+	width:500px;
+	height:250px;
 	margin:auto;
+	margin-top:200px;
 	color:white;
+	background:black;
 	text-align:center;
 }
 #attribution {
@@ -27,7 +37,12 @@ body {
 #attribution a {
 	color:white;
 }
-h1, h2 { color: white; }
+h1 { font-size:70px; }
+h2 { font-size:30px; }
+h1, h2 {
+	color: white;
+	font-family: "lane";
+}
 </style>
 <body>
 <div id="main">
