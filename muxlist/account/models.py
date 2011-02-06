@@ -22,3 +22,10 @@ class Invite(models.Model):
 
     def __unicode__(self):
         return u"%s - %s" % (self.owner, self.code)
+
+class InviteRequest(models.Model):
+    email = models.EmailField(max_length=128, unique=True)
+    created_on = models.DateTimeField(auto_now_add=True)
+
+    def __unicode__(self):
+        return self.email

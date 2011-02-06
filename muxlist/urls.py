@@ -14,7 +14,8 @@ if 'django.core.management.commands.runserver' in sys.modules:
     urlpatterns += patterns('', (r'media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(ROOT_PATH, 'media/')}))
 
 urlpatterns += patterns('',
-    (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
+    (r'^$', 'muxlist.account.views.launch_page'),
+    (r'^thanks/$', 'muxlist.account.views.launch_page_thanks'),
     (r'^mix/', include('muxlist.mix.urls')),
     (r'^music/', include('muxlist.music.urls')),
     (r'^admin/', include(admin.site.urls)),
