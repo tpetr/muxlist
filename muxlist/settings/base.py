@@ -90,3 +90,5 @@ AUTH_PROFILE_MODULE = 'account.UserProfile'
 LOGIN_URL = '/account/login'
 
 HOSTNAME = 'localhost'
+
+AWS_ACCESS_KEY = '1GDBYBN31QAR4P85HQG2'

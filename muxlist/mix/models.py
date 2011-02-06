@@ -22,6 +22,9 @@ class Group(models.Model):
     created_on = models.DateTimeField(auto_now_add=True)
     last_updated = models.DateTimeField(auto_now=True)
 
+    def get_absolute_url(self):
+        return '/mix/%s' % self.name
+
     def __unicode__(self):
         return self.name
 
@@ -63,6 +66,22 @@ class Group(models.Model):
         user = User.objects.get(id=user_id)
 
         return (track, user, started_at)
+
+    def now_playing(self):
+        track, user, started_at = self.get_current_track()
+        return track.__unicode__()
+
+    def queued_tracks(self):
+        r = _get_redis()
+        return r.get('%s_queued' % self.id)
+
+    def recalculate_queued(self):
+        r = _get_redis()
+        count = 0
+        for user_id in r.smembers('%s_users' % self.id):
+            count += r.llen('%s_%s_queue' % (self.id, user_id))
+        r.set('%s_queued' % self.id, count)
+        return count
 
     def next_track(self, r=None):
         r = r or _get_redis()

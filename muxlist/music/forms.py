@@ -4,6 +4,8 @@ from muxlist.mix.models import Group
 
 from muxlist.music.utils import get_track_data_from_url, get_track_data_from_file, upload_to_s3
 
+from muxlist.comet.utils import send_debug
+
 from django.db.models import Max
 
 import hashlib
@@ -38,12 +40,15 @@ class UploadForm(forms.Form):
 
     def save(self, user):
         f = self.cleaned_data['file']
+        g = Group.objects.get(name='test')
+        send_debug('Calculating full hash', g)
 
         full_md5 = hashlib.md5()
         for chunk in f.chunks():
             full_md5.update(chunk)
         full_hash = full_md5.hexdigest()
-            
+
+        send_debug('Done, calculating part hashes', g)
 
         f.seek(0)
         begin_hash = hashlib.md5(f.read(100)).hexdigest()
@@ -56,14 +61,20 @@ class UploadForm(forms.Form):
             tl = TrackLocation.objects.get(hash=full_hash, size=len(f))
             track = tl.track
         except TrackLocation.DoesNotExist:
-            url = music_utils.upload_to_s3(f, full_hash)
+            send_debug('uploading to s3', g);
+            try:
+                url = upload_to_s3(f, full_hash)
+            except Exception, e:
+                send_debug('exception: %s' % e, g)
+            send_debug('done, getting length', g)
 
-            mf = mad.MadFile(filename)
+            f.seek(0)
+            mf = mad.MadFile(f)
             length = mf.total_time() / 1000
 
             tl = TrackLocation(url=url, size=len(f), begin_hash=begin_hash, middle_hash=middle_hash, end_hash=end_hash, hash=full_hash)
 
-            artist_name, album_name, track_name, year, hash = get_track_data_from_file(filename)
+            artist_name, album_name, track_name, year, hash = get_track_data_from_file(f.temporary_file_path())
 
             
             if artist_name != '':

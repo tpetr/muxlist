@@ -1,6 +1,13 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from settings import AWS_ACCESS_KEY
+from muxlist.music.utils import _get_s3_connection
+from muxlist.comet.utils import send_debug
+
+from math import floor
+import time
+
 class Artist(models.Model):
     name = models.CharField(max_length=128)
 
@@ -42,11 +49,18 @@ class Track(models.Model):
         return u"%s - %s" % (self.artist.name, self.title)
 
     def __json__(self):
-        return {'title': self.title, 'album': (self.album and self.album.name) or '???', 'artist': (self.artist and self.artist.name) or '???', 'cover_art': (self.album and self.album.image) or None, 'url': self.get_location().url}
+        return {'title': self.title, 'album': (self.album and self.album.name) or '???', 'artist': (self.artist and self.artist.name) or '???', 'cover_art': (self.album and self.album.image) or None, 'url': self.get_location().get_url()}
     
 class TrackLocation(models.Model):
-    url = models.URLField(max_length=128)
+    url = models.URLField(max_length=512, verify_exists=False)
     track = models.ForeignKey(Track, related_name='locations')
+
+    def get_url(self):
+        if self.url.startswith('http://muxlist.s3.amazonaws.com/'):
+            conn = _get_s3_connection()
+            return conn.generate_url(self.track.length, 'GET', 'muxlist', self.hash, force_http=True)
+        else:
+            return self.url
 
     size = models.PositiveIntegerField()
     hash = models.CharField(max_length=32)

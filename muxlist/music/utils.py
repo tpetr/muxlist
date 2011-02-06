@@ -12,7 +12,7 @@ def upload_to_s3(fp, name):
     k = Key(bucket)
     k.key = name
     k.set_contents_from_file(fp)
-    return k.generate_url(36000)
+    return 'http://muxlist.s3.amazonaws.com/%s' % name
 
 
 def get_track_data_from_url(url):

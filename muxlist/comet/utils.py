@@ -7,10 +7,12 @@ def _get_stomp():
     conn.connect()
     return conn
     
-def send_debug(msg, group):
+def send_debug(msg, group=None):
     conn = _get_stomp()
     msg = json.dumps({'type': 'debug', 'msg': msg})
-    conn.send(msg, destination='/group/%s' % group.id)
+    id = 1
+    if group: id = group.id
+    conn.send(msg, destination='/group/%s' % id)
 
 def send_chat(msg, user, group):
     conn = _get_stomp()

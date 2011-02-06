@@ -19,8 +19,7 @@ var stomp;
 var comet_ready;
 $(document).ready(function () {
 	comet_ready = function() {
-		console.log("ready");
-		$.post('./current/', function (data) { console.log(data); stomp.onmessageframe({'body': data});});
+		$.post('./current/', function (data) { stomp.onmessageframe({'body': data});});
 	}
 	stomp = new STOMPClient();
 	stomp.onconnectedframe = function () {
@@ -31,11 +30,9 @@ $(document).ready(function () {
 	};
 	stomp.onreceiptframe = function (frame) {
 		data = JSON.parse(frame.body)
-                console.log(frame)
 	}
         stomp.onmessageframe = function (frame) {
 		data = JSON.parse(frame.body);
-                console.log("message", data)
 		if (data.type == 'chat') {
 			$('<li><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
 		} else if (data.type == 'track') {
@@ -51,7 +48,6 @@ $(document).ready(function () {
 			jp.jPlayer('stop');
 			jp.jPlayer('setMedia',{mp3: data.track.url});
                         if ('time' in data) {
-				console.log("time:", data.time)
 				jp.jPlayer("play", data.time)
 			} else {
 				jp.jPlayer("play");
@@ -75,9 +71,7 @@ $(document).ready(function () {
 		if (xhr.status == 200) {
 			$.fn.clearLastFile();
 			if ($.fn.getURL() == '/music/begin_slice/') {
-				console.log("worked on first try");
 			} else {
-				console.log("we're good!");
 			}
 			$.fn.setURL('/music/begin_slice/');
 			$('#uploading').html('')
@@ -88,13 +82,10 @@ $(document).ready(function () {
 			if (xhr.status == 402) {
 				$.fn.setURL('/music/middle_slice/');
 				var size = file.fileSize;
-				console.log("trying next");
 				$.fn.startXHRSlice(file, xhr.upload.fileIndex + 1, Math.floor(size/2)-50, Math.floor(size/2)+50);
 				return;
 			} else if (xhr.status == 404) {
-				console.log(file);
 				$.fn.setURL('/music/upload/');
-				console.log("trying all from begin");
 				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
 				return;
 			}
@@ -104,12 +95,10 @@ $(document).ready(function () {
 			if (xhr.status == 402) {
 				$.fn.setURL('/music/end_slice/');
 				var size = file.fileSize;
-				console.log("trying next");
 				$.fn.startXHRSlice(file, xhr.upload.fileIndex + 1, size-100, size);
 				return;
 			} else if (xhr.status == 404) {
 				$.fn.setURL('/music/upload/');
-				console.log('trying all');
 				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
 				return;
 			}
@@ -119,7 +108,6 @@ $(document).ready(function () {
 
 	function song_ended() {
 		$('#current').fadeOut();
-                console.log("requesting next");
 		$.post('./next/')
 	}
 
@@ -155,6 +143,8 @@ body { margin: 0; padding: 0; }
 h1, h2, h3 { margin: 0px; }
 #progress_outer { height:10px; width:200px; border:1px solid; background:white; }
 #progress_inner { height:10px; background: black; width: 0%; }
+ul { margin:0px; padding: 0px; }
+li { margin:0px; padding: 0px; list-style:none; }
 </style>
 </head>
 <body>
