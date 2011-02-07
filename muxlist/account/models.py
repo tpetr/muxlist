@@ -18,11 +18,14 @@ models.signals.post_save.connect(create_userprofile, sender=User)
 
 class Invite(models.Model):
     owner = models.ForeignKey(User)
-    email = models.EmailField(unique=True)
+    email = models.EmailField()
     code = models.CharField(max_length=32, unique=True, db_index=True)
 
     def __unicode__(self):
         return u"%s - %s" % (self.owner, self.email)
+
+    class Meta:
+        unique_together = ('owner', 'email')
 
 class InviteRequest(models.Model):
     email = models.EmailField(max_length=128, unique=True)

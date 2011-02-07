@@ -80,7 +80,7 @@ $(document).ready(function () {
 			} else {
 			}
 			$.fn.setURL('/music/begin_slice/');
-			$('#uploading').html('')
+			$('#uploading').html('Drop an MP3 file anywhere!')
 			return;
 		}
 
@@ -188,7 +188,7 @@ Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 <ul id="stream">
 </ul>
 {% if user.is_authenticated %}
-Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading"></span>
+Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading">Drop an MP3 file anywhere!</span>
 {% endif %}
 </div>
 </div>

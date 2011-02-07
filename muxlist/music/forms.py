@@ -41,14 +41,14 @@ class UploadForm(forms.Form):
     def save(self, user):
         f = self.cleaned_data['file']
         g = Group.objects.get(name='test')
-        send_debug('Calculating full hash', g)
+        if settings.DEBUG: send_debug('Calculating full hash', g)
 
         full_md5 = hashlib.md5()
         for chunk in f.chunks():
             full_md5.update(chunk)
         full_hash = full_md5.hexdigest()
 
-        send_debug('Done, calculating part hashes', g)
+        if settings.DEBUG: send_debug('Done, calculating part hashes', g)
 
         f.seek(0)
         begin_hash = hashlib.md5(f.read(100)).hexdigest()
@@ -61,12 +61,12 @@ class UploadForm(forms.Form):
             tl = TrackLocation.objects.get(hash=full_hash, size=len(f))
             track = tl.track
         except TrackLocation.DoesNotExist:
-            send_debug('uploading to s3', g);
+            if settings.DEBUG: send_debug('uploading to s3', g);
             try:
                 url = upload_to_s3(f, full_hash)
             except Exception, e:
-                send_debug('exception: %s' % e, g)
-            send_debug('done, getting length', g)
+                if settings.DEBUG: send_debug('exception: %s' % e, g)
+            if settings.DEBUG: send_debug('done, getting length', g)
 
             f.seek(0)
             mf = mad.MadFile(f)
