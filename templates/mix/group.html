@@ -151,6 +151,9 @@ function send_chat_enter(event) {
 		send_chat();
 	}
 }
+$(window).error(function (event) {
+	console.log("error: ", event);
+});
 </script>
 <style>
 body { margin: 0; padding: 0; }

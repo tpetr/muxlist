@@ -1,0 +1,83 @@
+<html>
+<head>
+<title>{% block title %}muxlist{% endblock %}</title>
+<link rel="stylesheet" href="/static/blueprint/screen.css" type="text/css" media="screen, projection">
+<link rel="stylesheet" href="/static/blueprint/print.css" type="text/css" media="print">
+<!--[if lt IE 8]>
+  <link rel="stylesheet" href="/static/blueprint/ie.css" type="text/css" media="screen, projection">
+<![endif]-->
+</head>
+<style>
+@font-face {
+	font-family: 'lane';
+	src: url('/static/fonts/lanenar_-webfont.eot');
+	src: local("☺"),
+    		url("/static/fonts/lanenar_-webfont.woff") format("woff"),
+		url("/static/fonts/lanenar_-webfont.otf") format("opentype"),
+		url("/static/fonts/lanenar_-webfont.svg#filename") format("svg");
+}
+body {
+	background:black url(/static/tapedeck.jpg) center;
+	font-family: "lane";
+}
+#main {
+	width:500px;
+	padding:20px;
+	/* height:300px; */
+	margin:auto;
+	color:white;
+	background: black;
+	background: rgba(0,0,0,0.7);
+	text-align:center;
+	-moz-border-radius: 30px;
+	border-radius: 30px;
+}
+#attribution {
+	position: fixed;
+	right:0px;
+	bottom:0px;
+	color:white;
+}
+#attribution a {
+	color:white;
+}
+label { font-size: 20px; }
+h1 { font-size:70px; line-height: 70px; }
+h2 { font-size:30px; }
+h1, h2 {
+	color: white;
+	margin:0;
+	padding:0;
+}
+ul#errors { margin: 0; padding: 0 }
+ul#errors li { margin:0; padding: 0; list-style: none; color: red; font-size:25px;}
+ul#errors li.good { color: white; }
+</style>
+<script src="/static/jquery-1.4.2.min.js"></script>
+<body>
+<div id="main">
+{% block content %}
+
+{% endblock %}
+</div>
+<span id="attribution">Picture by the talented <a href="http://www.flickr.com/people/detune/" target="_blank">Dennis Beentjes</a></span>
+<script type="text/javascript">
+function valign() {
+	$('#main').css('margin-top', (($(window).height() - $('#main').height()) / 2) + 'px')
+}
+valign();
+$(window).resize(valign);
+
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-2869175-16']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+
+</script>
+</body>
+</html>
