@@ -16,6 +16,7 @@ if 'django.core.management.commands.runserver' in sys.modules:
 urlpatterns += patterns('',
     (r'^$', 'muxlist.account.views.launch_page'),
     (r'^thanks/$', 'muxlist.account.views.launch_page_thanks'),
+    (r'^invite/(?P<code>[a-zA-Z0-9]+)/$', 'muxlist.account.views.invite'),
     (r'^mix/', include('muxlist.mix.urls')),
     (r'^music/', include('muxlist.music.urls')),
     (r'^admin/', include(admin.site.urls)),

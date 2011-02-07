@@ -1,6 +1,7 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
-from muxlist.account.forms import InviteRequestForm
+from muxlist.account.forms import InviteRequestForm, InviteForm
+from muxlist.account.models import Invite
 
 def launch_page(request):
     if request.method == "POST":
@@ -17,3 +18,17 @@ def launch_page_thanks(request):
     form = InviteRequestForm()
 
     return render_to_response('thanks.html', {'form': form})
+
+def invite(request, code):
+    try:
+        Invite.objects.get(code=code)
+    except Invite.DoesNotExist: 
+        raise Http404()
+    if request.method == 'POST':
+        form = InviteForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return HttpResponseRedirect("/okay/")
+    else:
+        form = InviteForm({'invite_code': code})
+    return render_to_response('invite.html', {'form': form, 'code': code})
