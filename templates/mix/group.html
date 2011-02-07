@@ -35,11 +35,16 @@ $(document).ready(function () {
 		data = JSON.parse(frame.body);
 		if (data.type == 'chat') {
 			$('<li><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
+			stream_scroll();
 		} else if (data.type == 'track') {
 			$('#current').html('');
 			$('#cover_art').attr('src', '');
                         if (data.track.cover_art) {
+				$('#current').css('width', '424px');
 				$('#cover_art').attr('src', data.track.cover_art);
+				$('#cover_art').fadeIn();
+			} else {
+				$('#current').css('width', '598px');
 			}
 			$('<h1>' + data.track.title + '</h1><h2>on ' + data.track.album + '</h2><h2>by ' + data.track.artist + '</h2><h3>from ' + data.user + '</h3><div id="progress_outer"><div id="progress_inner"></div></div>').appendTo('#current');
 			$('<li><div><b>' + data.user + '</b> is playing <b>' + data.track.artist + ' - ' + data.track.title + '</b></li>').appendTo('#stream');
@@ -52,9 +57,10 @@ $(document).ready(function () {
 			} else {
 				jp.jPlayer("play");
 			}
-			
+			stream_scroll();
 		} else if (data.type == 'debug') {
 			$('<li><i>DEBUG: ' + data.msg + '</i></li>').appendTo('#stream')
+			stream_scroll();
 		}
 	}
 	stomp.connect('localhost', 61613);
@@ -108,6 +114,7 @@ $(document).ready(function () {
 
 	function song_ended() {
 		$('#current').fadeOut();
+		$('#cover_art').fadeOut();
 		$.post('./next/')
 	}
 
@@ -125,11 +132,18 @@ var baz = true;
 		preload: 'auto'
 	});
 });
+function stream_scroll() {
+	if ($('#stream').attr('scrollTop') != $('#stream').attr('scrollHeight')) {
+		$('#stream').animate({ scrollTop: $('#stream').attr('scrollHeight')})
+	}
+}
 function send_chat() {
 	$.post('./add/', {'msg': $('#message').val()});
 	$('#message').val('').focus();
 }
 function send_next() {
+	$('#current').fadeOut();
+	$('#cover_art').fadeOut();
 	$.post('./force-next/');
 }
 function send_chat_enter(event) {
@@ -145,6 +159,10 @@ h1, h2, h3 { margin: 0px; }
 #progress_inner { height:10px; background: black; width: 0%; }
 ul { margin:0px; padding: 0px; }
 li { margin:0px; padding: 0px; list-style:none; }
+ul#stream {
+height: 500px;
+overflow-y: scroll;
+}
 </style>
 </head>
 <body>
@@ -171,5 +189,12 @@ Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input
 {% endif %}
 </div>
 </div>
+<script>
+function stream_resize() {
+	$('#stream').css('height', ($(window).height() - 229) + 'px')
+}
+stream_resize();
+$(window).resize(stream_resize);
+</script>
 </body>
 </html>
