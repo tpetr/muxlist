@@ -9,7 +9,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    # ('Your Name', 'your_email@domain.com'),
+    ('Tom Petr', 'trpetr@gmail.com')
 )
 
 MANAGERS = ADMINS
@@ -20,6 +20,9 @@ DATABASES = {
         'NAME': os.path.join(ROOT_PATH, 'etc/muxlist.sqlite'),
     }
 }
+
+SERVER_EMAIL = 'trpetr@gmail.com'
+EMAIL_SUBJECT_PREFIX = '[muxlist] '
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name

@@ -1,8 +1,10 @@
 {% extends "pretty.html" %}
 
 {% block content %}
+<h1>muxlist</h1>
 <form action="" method="post">
 {{ form.as_p }}
-<input type="submit" value="Go">
+<input type="hidden" name="invite_code" value="{{ code }}">
+<input type="submit" value="Create Account">
 </form>
 {% endblock %}

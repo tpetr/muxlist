@@ -49,7 +49,7 @@
 	$.fn.dropzone.defaults = {
 		url : "",
 		method : "POST",
-		numConcurrentUploads : 3,
+		numConcurrentUploads : 1,
 		printLogs : false,
 		// update upload speed every second
 		uploadRateRefreshTime : 1000

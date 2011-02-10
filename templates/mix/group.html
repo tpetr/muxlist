@@ -17,6 +17,7 @@ TCPSocket = Orbited.TCPSocket
 <script>
 var stomp;
 var comet_ready;
+var show_progress = false;
 $(document).ready(function () {
 	comet_ready = function() {
 		$.post('./current/', function (data) { stomp.onmessageframe({'body': data});});
@@ -67,18 +68,24 @@ $(document).ready(function () {
 
 {% if user.is_authenticated %}
 	$("#everything").dropzone({ url: '/music/begin_slice/' });
+	$.fn.dropzone.fileUploadProgressUpdated = function (index, file, progress) {
+		console.log(progress)
+	};
 
 	$.fn.dropzone.uploadStarted = function () {
-		$('#uploading').html('<img src="/static/throbber.gif"> Uploading...');
+		if (show_progress) {
+			$('#uploading').html('')
+			$('<div id="upload_outer"><div id="upload_inner"></div><div>').appendTo('#uploading')
+			show_progress = false;
+		} else {
+			$('#uploading').html('<img src="/static/throbber.gif"> Uploading...');
+		}
 	}
 
 	$.fn.dropzone.uploadFinishedResponse = function (xhr) {
 		var file = $.fn.getLastFile();
 		if (xhr.status == 200) {
 			$.fn.clearLastFile();
-			if ($.fn.getURL() == '/music/begin_slice/') {
-			} else {
-			}
 			$.fn.setURL('/music/begin_slice/');
 			$('#uploading').html('Drop an MP3 file anywhere!')
 			return;
@@ -92,8 +99,12 @@ $(document).ready(function () {
 				return;
 			} else if (xhr.status == 404) {
 				$.fn.setURL('/music/upload/');
+				show_progress = true;
+				console.log('showing progress')
 				$.fn.startXHRAll(file, xhr.upload.fileIndex + 1);
 				return;
+			} else if (xhr.status == 500) {
+				$('#uploading').html('Must be an MP3 file!')
 			}
 		}
 
@@ -118,7 +129,6 @@ $(document).ready(function () {
 		$.post('./next/')
 	}
 
-var baz = true;
 	function update_progress(event) {
 		$('#progress_inner').css('width', event.jPlayer.status.currentPercentAbsolute + '%')
 	}
@@ -160,6 +170,8 @@ body { margin: 0; padding: 0; }
 h1, h2, h3 { margin: 0px; }
 #progress_outer { height:10px; width:200px; border:1px solid; background:white; }
 #progress_inner { height:10px; background: black; width: 0%; }
+#upload_outer { height:10px; width:200px; border:1px solid; background:white; }
+#upload_inner { height:10px; background: black; width: 0%; }
 ul { margin:0px; padding: 0px; }
 li { margin:0px; padding: 0px; list-style:none; }
 ul#stream {
@@ -173,7 +185,7 @@ overflow-y: scroll;
 <div id="container" style="width:600px;margin:auto;">
 <div id="jplayer"></div>
 <div>
-muxlist // {{ group.name }}
+muxlist // {{ group.name }}{% if user.get_profile.invites %} // <a href="/invite/send/">{{ user.get_profile.invites }} invites left</a>{% endif %}
 {% if user.is_authenticated %}
 <span style="float:right">
 Logged in as {{ user }} <a href="/account/logout/">Logout</a>

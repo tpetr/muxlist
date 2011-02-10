@@ -34,7 +34,7 @@ def begin_slice(request):
             request.session['begin_hash'] = begin_hash
             return HttpResponse(status=402)
         else:
-            raise Http404('Unknown song')
+            return HttpResponse("invalid: %s" % (', '.join(form.errors)), status=500)
     return HttpResponse('Must POST', status=500)
 
 @login_required
@@ -56,7 +56,7 @@ def middle_slice(request):
             request.session['middle_hash'] = middle_hash
             return HttpResponse(status=402)
         else:
-            raise Http404('Unknown song')
+            return HttpResponse("invalid: %s" % (', '.join(form.errors)), status=500)
     return HttpResponse('Must POST', status=500)
 
 @login_required
@@ -76,7 +76,7 @@ def end_slice(request):
             except TrackLocation.DoesNotExist: pass
             return HttpResponse(status=404)
         else:
-            raise Http404('Unknown song')
+            return HttpResponse("invalid: %s" % (', '.join(form.errors)), status=500)
     return HttpResponse('Must POST', status=500)
 
 @login_required

@@ -1,12 +1,50 @@
 from django import forms
 from muxlist.account.models import InviteRequest, Invite
 from django.contrib.auth.models import User
+import hashlib
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from settings import HOSTNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from boto.ses import SESConnection
 
 attrs_dict = {'class': 'required'}
 
 class InviteRequestForm(forms.ModelForm):
     class Meta:
         model = InviteRequest
+        fields = ['email']
+
+class SendInviteForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        self.user = user
+        super(SendInviteForm, self).__init__(*args, **kwargs)
+
+    def clean_email(self):
+        try:
+            user = User.objects.get(email__iexact=self.cleaned_data['email'])
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
+        raise forms.ValidationError('A user with that email address already exists')
+    def clean(self):
+        if self.user.get_profile().invites == 0:
+            raise forms.ValidationError("You don't have any invites left")
+        return self.cleaned_data
+
+    def save(self):
+        invite = super(SendInviteForm, self).save(commit=False)
+        h = hashlib.md5("%s%sfunkyfresh" % (self.user.id, invite.email))
+        invite.code = h.hexdigest()
+        invite.owner = self.user
+        invite.save()
+        p = self.user.get_profile()
+        p.invites -= 1
+        p.save()
+        c = SESConnection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
+        send_mail("[muxlist] You're invited!", render_to_string('email/invite.html', {'hostname': HOSTNAME, 'invite': invite}), 'trpetr@gmail.com', [invite.email])
+        return invite
+
+    class Meta:
+        model = Invite
         fields = ['email']
 
 class InviteForm(forms.Form):
@@ -21,6 +59,13 @@ class InviteForm(forms.Form):
         except User.DoesNotExist:
             return self.cleaned_data['username']
         raise forms.ValidationError("A user with that username already exists")
+
+    def clean_email(self):
+        try:
+            user = User.objects.get(email__iexact=self.cleaned_data['email'])
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
+        raise forms.ValidationError('A user with that email address already exists')
 
     def clean(self):
         if 'password1' in self.cleaned_data and 'password2' in self.cleaned_data:
