@@ -16,9 +16,16 @@
 		url("/static/fonts/lanenar_-webfont.otf") format("opentype"),
 		url("/static/fonts/lanenar_-webfont.svg#filename") format("svg");
 }
+@font-face {
+	font-family: 'cantarell';
+	src: url('/static/fonts/cantarell-regular-webfont.eot');
+	src: local("☺"),
+    		url("/static/fonts/cantarell-regular-webfont.woff") format("woff"),
+		url("/static/fonts/cantarell-regular-webfont.otf") format("opentype"),
+		url("/static/fonts/cantarell-regular-webfont.svg#filename") format("svg");
 body {
 	background:black url(/static/tapedeck.jpg) center;
-	font-family: "lane";
+	font-family: "cantarell";
 }
 #main {
 	width:500px;
@@ -48,6 +55,7 @@ h1, h2 {
 	color: white;
 	margin:0;
 	padding:0;
+	font-family: "lane";
 }
 ul#errors { margin: 0; padding: 0 }
 ul#errors li { margin:0; padding: 0; list-style: none; color: red; font-size:25px;}
