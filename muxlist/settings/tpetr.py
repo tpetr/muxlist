@@ -1,5 +1,7 @@
 __ALL__ = ('DATABASES', 'MEDIA_URL', 'HOSTNAME', 'DEBUG')
 
+NEW_USER_NOTIFICATION = True
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',

@@ -71,9 +71,13 @@ class Group(models.Model):
         track, user, started_at = self.get_current_track()
         return track.__unicode__()
 
-    def queued_tracks(self):
+    def queued_tracks_count(self):
         r = _get_redis()
         return r.get('%s_queued' % self.id)
+
+    def queued_users_count(self):
+        r = _get_redis()
+        return r.scard('%s_users' % self.id)
 
     def recalculate_queued(self):
         r = _get_redis()

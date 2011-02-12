@@ -7,7 +7,7 @@ def recalculate_queued_count(modeladmin, request, queryset):
 recalculate_queued_count.short_description = 'Recalculate queued count'
 
 class GroupAdmin(admin.ModelAdmin):
-    list_display = ['name', 'now_playing', 'queued_tracks']
+    list_display = ['name', 'now_playing', 'queued_tracks_count', 'queued_users_count']
     actions = [recalculate_queued_count]
 
 admin.site.register(Group, GroupAdmin)

@@ -12,6 +12,8 @@ ADMINS = (
     ('Tom Petr', 'trpetr@gmail.com')
 )
 
+NEW_USER_NOTIFICATION = False
+
 MANAGERS = ADMINS
 
 DATABASES = {

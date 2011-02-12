@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
+from muxlist.account.utils import send_new_user_email
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -15,7 +16,8 @@ def create_userprofile(sender, instance, created, **kwargs):
     if created:
         print "Making userprofile"
         UserProfile.objects.create(user=instance)
-        send_mail("[muxlist] New user: %s" % instance.username, render_to_string('email/new_user.html', {'user': instance}), 'trpetr@gmail.com', ['trpetr@gmail.com'])
+        if NEW_USER_NOTIFICATIONS:
+            send_new_user_email(instance)
 
 models.signals.post_save.connect(create_userprofile, sender=User)
 
