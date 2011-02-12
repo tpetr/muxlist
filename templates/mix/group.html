@@ -47,6 +47,9 @@ $(document).ready(function () {
 			} else {
 				$('#current').css('width', '598px');
 			}
+			if (data.track.queue_count) {
+				$('#queue_count').html = data.queue_count
+			}
 			$('<h1>' + data.track.title + '</h1><h2>on ' + data.track.album + '</h2><h2>by ' + data.track.artist + '</h2><h3>from ' + data.user + '</h3><div id="progress_outer"><div id="progress_inner"></div></div>').appendTo('#current');
 			$('<li><div><b>' + data.user + '</b> is playing <b>' + data.track.artist + ' - ' + data.track.title + '</b></li>').appendTo('#stream');
 			$('#current').fadeIn();
@@ -62,6 +65,8 @@ $(document).ready(function () {
 		} else if (data.type == 'debug') {
 			$('<li><i>DEBUG: ' + data.msg + '</i></li>').appendTo('#stream')
 			stream_scroll();
+		} else if (data.type == 'queue_count') {
+			$('#queue_count').html = data.value
 		}
 	}
 	stomp.connect('localhost', 61613);
@@ -198,7 +203,7 @@ Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 <ul id="stream">
 </ul>
 {% if user.is_authenticated %}
-Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading">Drop an MP3 file anywhere!</span>
+Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading">Drop an MP3 file anywhere!</span><span> <span id="queue_count">0</span> queued</span>
 {% endif %}
 </div>
 </div>

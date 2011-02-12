@@ -116,5 +116,14 @@ class Group(models.Model):
         # don't continue if current song is playing or no queued tracks
         if r.ttl('%s_current' % self.id) > -1: return None, None, None
 
+        # get lock
+        if r.get('%s_lock' % self.id) == 1: return None, None, None
+        r.set('%s_lock' % self.id, 1)
+
         # next track!
-        return self.next_track(r)
+        results = self.next_track(r)
+
+        # release lock
+        r.set('%s_lock' % self.id, 0)
+
+        return results

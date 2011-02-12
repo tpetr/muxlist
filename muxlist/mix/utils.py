@@ -1,5 +1,6 @@
 def dequeue_track(r, group_id):
     user_id, track_id = None, None
+    r.set('%s_lock', 1)
     while track_id == None:
         user_id = r.spop('%s_users' % group_id)
         if user_id == None: break
@@ -7,5 +8,7 @@ def dequeue_track(r, group_id):
         if track_id != None:
             r.sadd('%s_users' % group_id, user_id)
             r.decr('%s_queued' % group_id)
+
+    r.set('%s_lock', 0)
 
     return user_id, track_id
