@@ -45,6 +45,7 @@ class Group(models.Model):
 
         # send queue update if next song not pushed
         if self.check_for_next_track()[0] == None:
+            print "send_queue_update()"
             comet_utils.send_queue_update(count, self)
 
         # return queue count
@@ -89,18 +90,20 @@ class Group(models.Model):
 
     def next_track(self, r=None):
         r = r or _get_redis()
+        user_id, track_id = None, None
 
-        # grab a track from someone
-        user_id, track_id = dequeue_track(r, self.id)
-        if track_id == None: return None, None, None
+        with r.lock('%s_dequeue_lock' % self.id):
+            # grab a track from someone
+            user_id, track_id = dequeue_track(r, self.id)
+            if track_id == None: return None, None, None
 
-        # record what time the track started
-        started_at = floor(time.time()) + 1 # add a second for RTT and crap
+            # record what time the track started
+            started_at = floor(time.time()) + 1 # add a second for RTT and crap
 
-        # set the track as current
-        r.set('%s_current' % self.id, track_id)
-        r.set('%s_current_user' % self.id, user_id)
-        r.set('%s_current_start' % self.id, started_at)
+            # set the track as current
+            r.set('%s_current' % self.id, track_id)
+            r.set('%s_current_user' % self.id, user_id)
+            r.set('%s_current_start' % self.id, started_at)
 
         # grab data from db
         user = User.objects.get(id=user_id)
@@ -120,5 +123,12 @@ class Group(models.Model):
         # don't continue if current song is playing or no queued tracks
         if r.ttl('%s_current' % self.id) > -1: return None, None, None
 
+        lock = r.lock('%s_current_lock' % self.id)
+        if not lock.acquire(False): return None, None, None
+
         # next track!
-        return self.next_track(r)
+        results = self.next_track(r)
+
+        lock.release()
+
+        return results

@@ -57,7 +57,7 @@ def current_track(request, group_name):
     if track == None: raise Http404()
 
     # return current track info
-    return HttpResponse(json.dumps({'type': 'track', 'track': track.__json__(), 'user': user.username, 'time': time.time() - float(started_at)}))
+    return HttpResponse(json.dumps([{'type': 'track', 'track': track.__json__(), 'user': user.username, 'time': time.time() - float(started_at)}]))
 
 def index(request, group_name):
     # get group

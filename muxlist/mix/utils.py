@@ -1,5 +1,6 @@
 def dequeue_track(r, group_id):
     user_id, track_id = None, None
+
     while track_id == None:
         user_id = r.spop('%s_users' % group_id)
         if user_id == None: break
