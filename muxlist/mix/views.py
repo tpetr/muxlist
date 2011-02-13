@@ -15,6 +15,15 @@ from django.contrib.auth.models import User
 from muxlist.music.signals import track_uploaded
 from django.dispatch import receiver
 
+def heartbeat(request, group_name):
+    if not request.user.is_authenticated(): raise Http404
+
+    group = get_object_or_404(Group, name=group_name)
+
+    group.user_heartbeat(request.user)
+
+    return HttpResponse(json.dumps([u.username for u in group.get_users_online()]))
+
 @receiver(track_uploaded, sender=None)
 def tu(sender, **kwargs):
     group_name = 'test'
@@ -28,6 +37,8 @@ def next_track(request, group_name):
     # get group
     group = get_object_or_404(Group, name=group_name)
 
+    group.user_heartbeat(request.user)
+
     # check for next track
     if group.check_for_next_track()[0] == None: return HttpResponse(status=402)
 
@@ -39,6 +50,9 @@ def next_track_force(request, group_name):
 
     # TODO: check for some kind of creds
 
+    # user heartbeat
+    group.user_heartbeat(request.user)
+
     # next track!
     return HttpResponse(group.next_track())
 
@@ -49,6 +63,8 @@ def current_track(request, group_name):
     # must be valid user
     if not (group.is_public or (request.user.is_authenticated() and request.user in group.collaborators.all())):
         return HttpResponse(status=401)
+
+    group.user_heartbeat(request.user)
 
     # get current track
     track, user, started_at = group.get_current_track()
@@ -83,6 +99,8 @@ def add_message(request, group_name):
     # must be valid user
     if not (group.is_public or (request.user.is_authenticated() and request.user in group.collaborators.all())):
         return HttpResponse(status=401)
+
+    group.user_heartbeat(request.user)
 
     # send chat
     comet_utils.send_chat(request.POST['msg'], request.user, group)

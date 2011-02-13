@@ -2,9 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from mix.utils import dequeue_track
 import redis, time
-from math import floor
 
 from muxlist.music.models import Track
+from muxlist.account.utils import set_user_online_global, set_user_online_group, user_online_group
 
 from muxlist.comet import utils as comet_utils
 from django.conf import settings
@@ -28,6 +28,23 @@ class Group(models.Model):
     def __unicode__(self):
         return self.name
 
+    def user_heartbeat(self, user):
+        r = _get_redis()
+        now = int(time.time()) / 60
+
+        if not user_online_group(user, self, now, r):
+            comet_utils.send_user_join(user, self)
+
+        set_user_online_global(user, now, r)
+        set_user_online_group(user, self, now, r)
+
+    def get_users_online(self):
+        r = _get_redis()
+
+        now = int(time.time()) / 60
+
+        return User.objects.filter(id__in=r.sunion(['%i_online_%i' % (self.id, i) for i in xrange(now-settings.USER_IDLE_TIME+1, now+1)]))
+
     def enqueue_track(self, track, user):
         r = _get_redis()
 
@@ -45,7 +62,6 @@ class Group(models.Model):
 
         # send queue update if next song not pushed
         if self.check_for_next_track()[0] == None:
-            print "send_queue_update()"
             comet_utils.send_queue_update(count, self)
 
         # return queue count
@@ -98,7 +114,7 @@ class Group(models.Model):
             if track_id == None: return None, None, None
 
             # record what time the track started
-            started_at = floor(time.time()) + 1 # add a second for RTT and crap
+            started_at = int(time.time()) + 1 # add a second for RTT and crap
 
             # set the track as current
             r.set('%s_current' % self.id, track_id)

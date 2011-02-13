@@ -3,6 +3,8 @@ from mutagen.easyid3 import EasyID3
 
 from boto.s3.connection import S3Connection, Key
 
+import hashlib
+
 def _get_s3_connection():
     return S3Connection('1GDBYBN31QAR4P85HQG2', 'rcU7fQs/fOys/lQIJcNPZ65bk7kpyGJb5POommIV')
 
@@ -14,6 +16,12 @@ def upload_to_s3(fp, name):
     k.set_contents_from_file(fp)
     return 'http://muxlist.s3.amazonaws.com/%s' % name
 
+def calculate_md5(fp):
+    fp.seek(0)
+    md5 = hashlib.md5()
+    for chunk in f.chunks():
+        md5.update(chunk)
+    return md5.hexdigest()
 
 def get_track_data_from_url(url):
     request = urllib2.Request(url)

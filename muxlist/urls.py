@@ -24,4 +24,5 @@ urlpatterns += patterns('',
     (r'^admin/', include(admin.site.urls)),
     (r'^account/', include('muxlist.account.urls')),
     (r'^restq/', include('muxlist.restq.urls')),
+    (r'^comet/', include('muxlist.comet.urls')),
 )

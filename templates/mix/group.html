@@ -25,6 +25,7 @@ $(document).ready(function () {
 	stomp = new STOMPClient();
 	stomp.onconnectedframe = function () {
 		$("<li><i>thundercats are go</i></li>").appendTo('#stream');
+		$(window).unload(function () { $.post('/comet/disconnect/'); })
 		stomp.subscribe('/group/{{ group.id }}');
 		// why??
                 setTimeout("comet_ready()", 100)
@@ -69,6 +70,11 @@ $(document).ready(function () {
 			stream_scroll();
 		} else if (data.type == 'queue_count') {
 			$('#queue_count').html(data.value)
+		} else if (data.type == 'user_join') {
+			console.log(data)
+			$('<li><b>' + data.value + '</b> joined</li>').appendTo('#stream');
+		} else if (data.type == 'user_leave') {
+			$('<li><b>' + data.value + '</b> left</li>').appendTo('#stream');
 		}
 		}
 	}

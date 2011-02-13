@@ -54,11 +54,6 @@ class Track(models.Model):
 class TrackLocation(models.Model):
     url = models.URLField(max_length=512, verify_exists=False)
     track = models.ForeignKey(Track, related_name='locations')
-    queue = 'track'
-
-    @staticmethod
-    def perform(id):
-        print "perform!"
 
     def get_url(self):
         if self.url.startswith('http://muxlist.s3.amazonaws.com/'):

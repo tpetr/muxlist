@@ -14,6 +14,8 @@ ADMINS = (
 
 NEW_USER_NOTIFICATION = False
 
+USER_IDLE_TIME = 5
+
 MANAGERS = ADMINS
 
 DATABASES = {
@@ -88,9 +90,12 @@ INSTALLED_APPS = (
     'muxlist.music',
     'muxlist.mix',
     'muxlist.account',
+    'muxlist.comet',
+    'registration',
 )
 
 AUTH_PROFILE_MODULE = 'account.UserProfile'
+ACCOUNT_ACTIVATION_DAYS = 7
 
 LOGIN_URL = '/account/login'
 

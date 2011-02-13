@@ -28,3 +28,13 @@ def send_queue_update(count, group):
     conn = _get_stomp()
     msg = json.dumps([{'type': 'queue_count', 'value': count},])
     conn.send(msg, destination='/group/%s' % group.id)
+
+def send_user_join(user, group):
+    conn = _get_stomp()
+    msg = json.dumps([{'type': 'user_join', 'value': user.username}])
+    conn.send(msg, destination='/group/%i' % group.id)
+
+def send_user_leave(user, group):
+    conn = _get_stomp()
+    msg = json.dumps([{'type': 'user_leave', 'value': user.username}])
+    conn.send(msg, destination='/group/%i' % group.id)
