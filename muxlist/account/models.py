@@ -14,6 +14,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(User)
     parent = models.ForeignKey('self', blank=True, null=True)
     invites = models.PositiveSmallIntegerField(default=0)
+    picture_75 = models.URLField(blank=True, null=True)
+    picture_20 = models.URLField(blank=True, null=True)
 
     def __unicode__(self):
         return self.user.__unicode__()

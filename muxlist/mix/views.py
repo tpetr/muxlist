@@ -66,14 +66,18 @@ def current_track(request, group_name):
 
     group.user_heartbeat(request.user)
 
+    frames = [{'type': 'heartbeat', 'users': [u.username for u in group.get_users_online()]}]
+
     # get current track
     track, user, started_at = group.get_current_track()
 
     # flip out it nothing's playing
-    if track == None: raise Http404()
+    if track != None:
+        frames.append({'type': 'track', 'track': track.__json__(), 'user': user.username, 'time': time.time() - float(started_at)})
+
 
     # return current track info
-    return HttpResponse(json.dumps([{'type': 'track', 'track': track.__json__(), 'user': user.username, 'time': time.time() - float(started_at)}]))
+    return HttpResponse(json.dumps(frames))
 
 def index(request, group_name):
     # get group

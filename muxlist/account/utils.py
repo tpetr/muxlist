@@ -4,6 +4,20 @@ from settings import ADMINS
 
 import time, redis
 import settings
+import urllib2
+from BeautifulSoup import BeautifulSoup
+
+def get_random_image():
+    r = urllib2.urlopen('http://api.flickr.com/services/rest/?method=flickr.panda.getPhotos&api_key=d0a38c0607b6fca6a10726d0693a8aeb&panda_name=ling+ling&per_page=1&page=1')
+    bs = BeautifulSoup(r.read())
+    photo = bs.find('photo')
+    farm = photo['farm']
+    server = photo['server']
+    id = photo['id']
+    secret = photo['secret']
+    return ('http://farm%s.static.flickr.com/%s/%s_%s_s_d.jpg' % (farm, server, id, secret), photo['title'], photo['ownername'])
+    
+    
 
 def _get_redis():
     return redis.Redis(host='localhost', port=6379, db=0)

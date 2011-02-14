@@ -18,6 +18,7 @@ TCPSocket = Orbited.TCPSocket
 var stomp;
 var comet_ready;
 var full_upload = false;
+var users_online = {}
 $(document).ready(function () {
 	comet_ready = function() {
 		$.post('./current/', function (data) { stomp.onmessageframe({'body': data});});
@@ -71,10 +72,36 @@ $(document).ready(function () {
 		} else if (data.type == 'queue_count') {
 			$('#queue_count').html(data.value)
 		} else if (data.type == 'user_join') {
-			console.log(data)
 			$('<li><b>' + data.value + '</b> joined</li>').appendTo('#stream');
+			if (!(data.value in users_online)) {
+				$('<li id="user_' + data.value+ '">' + data.value + '</li>').appendTo('#online')
+				users_online[data.value] = true;
+			}
+			stream_scroll();
 		} else if (data.type == 'user_leave') {
 			$('<li><b>' + data.value + '</b> left</li>').appendTo('#stream');
+			if (data.value in users_online) {
+				$('#user_' + data.value).remove()
+				delete users_online[data.value]
+			}
+			stream_scroll();
+		} else if (data.type == 'heartbeat') {
+			console.log(data);
+			var now = {};
+			for (var k=0; k<data.users.length; k++) {
+				now[data.users[k]] = true;
+			}
+			for (var user in now) {
+				if (!(user in users_online)) {
+					$('<li id="user_' + user + '">' + user + '</li>').appendTo('#online')
+				}
+			}
+			for (var user in users_online) {
+				if (!(user in now)) {
+					$('#user_' + user ).remove()
+				}
+			}
+			users_online = now
 		}
 		}
 	}
@@ -186,8 +213,10 @@ h1, h2, h3 { margin: 0px; }
 #upload_inner { height:10px; background: black; width: 0%; }
 ul { margin:0px; padding: 0px; }
 li { margin:0px; padding: 0px; list-style:none; }
+#middle>ul {
+	height:100%;
+}
 ul#stream {
-height: 500px;
 overflow-y: scroll;
 }
 </style>
@@ -209,8 +238,12 @@ Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 {% endif %}
 </div>
 <div style="height:174px;border:1px solid;"><img id="cover_art" style="float:left"><div id="current" style="float:left">Nothing queued</div></div>
+<div id="middle">
+<ul id="online" style="float:right; width: 50px; height:100%;">
+</ul>
 <ul id="stream">
 </ul>
+</div>
 {% if user.is_authenticated %}
 Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input type="button" value="Send" onclick="send_chat()"><input type="button" value="Next" onclick="send_next()"><span id="uploading">Drop an MP3 file anywhere!</span><span> <span id="queue_count">0</span> queued</span>
 {% endif %}
@@ -218,7 +251,7 @@ Chat: <input type="text" id="message" onkeypress="send_chat_enter(event)"><input
 </div>
 <script>
 function stream_resize() {
-	$('#stream').css('height', ($(window).height() - 229) + 'px')
+	$('#middle').css('height', ($(window).height() - 229) + 'px')
 }
 stream_resize();
 $(window).resize(stream_resize);

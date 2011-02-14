@@ -2,6 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect, Http404
 from django.shortcuts import render_to_response
 from muxlist.account.forms import InviteRequestForm, InviteForm, SendInviteForm
 from muxlist.account.models import Invite
+from django.contrib.auth.decorators import login_required
 
 def launch_page(request):
     if request.method == "POST":
@@ -13,6 +14,10 @@ def launch_page(request):
         form = InviteRequestForm()
 
     return render_to_response('index.html', {'form': form})
+
+@login_required
+def dashboard(request):
+    return render_to_response('dashboard.html', {'user': request.user})
 
 def launch_page_thanks(request):
     form = InviteRequestForm()

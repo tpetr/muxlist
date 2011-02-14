@@ -25,6 +25,8 @@ DATABASES = {
     }
 }
 
+LOGIN_REDIRECT_URL = '/dashboard/'
+
 SERVER_EMAIL = 'trpetr@gmail.com'
 EMAIL_SUBJECT_PREFIX = '[muxlist] '
 

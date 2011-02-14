@@ -45,6 +45,15 @@ class Group(models.Model):
 
         return User.objects.filter(id__in=r.sunion(['%i_online_%i' % (self.id, i) for i in xrange(now-settings.USER_IDLE_TIME+1, now+1)]))
 
+    def get_users_online_count(self):
+        r = _get_redis()
+
+        now = int(time.time()) / 60
+
+        r.sunionstore('%i_online_cache' % self.id, ['%i_online_%i' % (self.id, i) for i in xrange(now-settings.USER_IDLE_TIME+1, now+1)])
+        return r.scard('%i_online_cache' % self.id)
+        
+
     def enqueue_track(self, track, user):
         r = _get_redis()
 
