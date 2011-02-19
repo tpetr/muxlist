@@ -5,6 +5,7 @@ from muxlist.music.forms import UploadForm
 from django.contrib.auth.decorators import login_required
 from muxlist.music.models import Track
 from settings import HOSTNAME
+from django.utils.html import escape
 
 from muxlist.comet import utils as comet_utils
 import json
@@ -22,7 +23,7 @@ def heartbeat(request, group_name):
 
     group.user_heartbeat(request.user)
 
-    return HttpResponse(json.dumps([u.username for u in group.get_users_online()]))
+    return HttpResponse(json.dumps({'type': 'heartbeat', 'users': [u.username for u in group.get_users_online()]}))
 
 @receiver(track_uploaded, sender=None)
 def tu(sender, **kwargs):
@@ -52,6 +53,8 @@ def next_track_force(request, group_name):
 
     # user heartbeat
     group.user_heartbeat(request.user)
+
+    comet_utils.send_chat('I just hit next. :-P', request.user, group)
 
     # next track!
     return HttpResponse(group.next_track())
@@ -107,6 +110,6 @@ def add_message(request, group_name):
     group.user_heartbeat(request.user)
 
     # send chat
-    comet_utils.send_chat(request.POST['msg'], request.user, group)
+    comet_utils.send_chat(escape(request.POST['msg']), request.user, group)
 
     return HttpResponse()

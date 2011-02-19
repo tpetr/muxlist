@@ -19,9 +19,13 @@ var stomp;
 var comet_ready;
 var full_upload = false;
 var users_online = {}
+function send_heartbeat() {
+	$.post('./heartbeat/', function (data) { stomp.onmessageframe({'body': data});});
+}
 $(document).ready(function () {
 	comet_ready = function() {
 		$.post('./current/', function (data) { stomp.onmessageframe({'body': data});});
+		setInterval('send_heartbeat()', 270000);
 	}
 	stomp = new STOMPClient();
 	stomp.onconnectedframe = function () {
@@ -39,7 +43,7 @@ $(document).ready(function () {
 		for (var j=0; j<datas.length; j++) {
 		data = datas[j]
 		if (data.type == 'chat') {
-			$('<li><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
+			$('<li style="background:url(/static/profile/' + data.user + '_20.jpg) top left no-repeat;"><b>' + data.user + '</b>: ' + data.msg + '</li>').appendTo('#stream');
 			stream_scroll();
 		} else if (data.type == 'track') {
 			$('#current').html('');
@@ -86,7 +90,6 @@ $(document).ready(function () {
 			}
 			stream_scroll();
 		} else if (data.type == 'heartbeat') {
-			console.log(data);
 			var now = {};
 			for (var k=0; k<data.users.length; k++) {
 				now[data.users[k]] = true;
@@ -219,6 +222,11 @@ li { margin:0px; padding: 0px; list-style:none; }
 ul#stream {
 overflow-y: scroll;
 }
+ul#stream>li {
+	background: no-repeat;
+	padding-left:20px;
+}
+#current h2 { max-height:27px; overflow-y:hidden; }
 </style>
 </head>
 <body>

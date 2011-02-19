@@ -49,6 +49,16 @@ body {
 #attribution a {
 	color:white;
 }
+#login {
+	position: fixed;
+	right:0px;
+	top:0px;
+	color:white;
+	padding:5px;
+	font-size:18px;
+}
+#login a { color:white; }
+	
 label { font-size: 20px; }
 h1 { font-size:70px; line-height: 70px; }
 h2 { font-size:30px; }
@@ -64,6 +74,7 @@ ul#errors li.good { color: white; }
 </style>
 <script src="/static/jquery-1.4.2.min.js"></script>
 <body>
+<span id="login">{% if request.user.is_authenticated %}<a href="/dashboard/">{{ user.username }}</a> // <a href="/account/logout">Logout</a>{% else %}<a href="/account/login/">Login</a>{% endif %}</span>
 <div id="main">
 {% block content %}
 

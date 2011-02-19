@@ -23,7 +23,8 @@ def begin_slice(request):
     if request.method == 'POST':
         form = SliceUploadForm(data=request.POST, files=request.FILES)
         if form.is_valid():
-            form.cleaned_data['group'].user_heartbeat(request.user)
+            if form.cleaned_data['group']:
+                form.cleaned_data['group'].user_heartbeat(request.user)
             begin_hash = hashlib.md5(form.cleaned_data['file'].read(100)).hexdigest()
             try:
                 tl = TrackLocation.objects.get(begin_hash=begin_hash, size=request.META['HTTP_X_FILE_SIZE'])

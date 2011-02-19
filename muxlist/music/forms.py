@@ -18,7 +18,7 @@ import mad
 import urllib2
 from BeautifulSoup import BeautifulSoup
 
-AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3', 'audio/mpeg3')
+AUDIO_MIMETYPES = ('audio/mp3', 'application/mp3', 'audio/mpeg3', 'audio/mpeg')
 
 class SliceUploadForm(forms.Form):
     file = forms.FileField()

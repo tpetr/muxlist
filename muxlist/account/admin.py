@@ -3,10 +3,14 @@ from muxlist.account.models import InviteRequest, Invite, UserProfile
 import hashlib
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from settings import HOSTNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
+from settings import HOSTNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ROOT_PATH
 from boto.ses import SESConnection
+import os, urllib2
 
-from muxlist.account.utils import get_random_image
+from muxlist.account.utils import get_random_images
+
+from PIL import Image
+
 
 def send_invite(modeladmin, request, queryset):
     for r in queryset:
@@ -21,14 +25,39 @@ class InviteRequestAdmin(admin.ModelAdmin):
     actions = [send_invite]
 
 def set_random_image_missing(modeladmin, request, queryset):
-    for r in queryset.filter(picture_75=None):
-        url = get_random_image()[0]
-        r.picture_75 = url
-        r.save()
-set_random_image_missing.short_description = "Set random image for picture-less users"
+    profiles = queryset.filter(picture_75=None)
+    urls = get_random_images(len(profiles))
+    for profile, url in zip(profiles, urls):
+        r = urllib2.urlopen(url)
+        fp = open(os.path.join(ROOT_PATH, 'static/profile/%s_75.jpg' % profile.user.username), "wb")
+        fp.write(r.read())
+        fp.close()
+        im = Image.open(os.path.join(ROOT_PATH, 'static/profile/%s_75.jpg' % profile.user.username))
+        im.thumbnail((20,20), Image.ANTIALIAS)
+        im.save(os.path.join(ROOT_PATH, 'static/profile/%s_20.jpg' % profile.user.username))
+        profile.picture_75 = "/static/profile/%s_75.jpg" % profile.user.username
+        profile.picture_20 = "/static/profile/%s_20.jpg" % profile.user.username
+        profile.save()
+set_random_image_missing.short_description = "Set random profile picture where missing"
+
+def set_random_image(modeladmin, request, queryset):
+    profiles = queryset.all()
+    urls = get_random_images(len(profiles))
+    for profile, url in zip(profiles, urls):
+        r = urllib2.urlopen(url)
+        fp = open(os.path.join(ROOT_PATH, 'static/profile/%s_75.jpg' % profile.user.username), "wb")
+        fp.write(r.read())
+        fp.close()
+        im = Image.open(os.path.join(ROOT_PATH, 'static/profile/%s_75.jpg' % profile.user.username))
+        im.thumbnail((20,20), Image.ANTIALIAS)
+        im.save(os.path.join(ROOT_PATH, 'static/profile/%s_20.jpg' % profile.user.username))
+        profile.picture_75 = "/static/profile/%s_75.jpg" % profile.user.username
+        profile.picture_20 = "/static/profile/%s_20.jpg" % profile.user.username
+        profile.save()
+set_random_image.short_description = "Set random profile picture"
 
 class UserProfileAdmin(admin.ModelAdmin):
-    actions = [set_random_image_missing]
+    actions = [set_random_image, set_random_image_missing]
 
 admin.site.register(InviteRequest, InviteRequestAdmin)
 admin.site.register(Invite)

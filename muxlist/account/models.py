@@ -29,8 +29,7 @@ def create_userprofile(sender, instance, created, **kwargs):
             g.save()
         except Group.DoesNotExist:
             pass
-        if settings.NEW_USER_NOTIFICATION:
-            send_new_user_email(instance)
+        send_new_user_email(instance)
 
 models.signals.post_save.connect(create_userprofile, sender=User)
 

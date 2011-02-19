@@ -1,0 +1,54 @@
+{% extends "pretty.html" %}
+
+{% block content %}
+<style>
+ul.groups { margin:0px; padding: 0px; }
+ul.groups>li { margin:0px; padding:0px; list-style: none; text-align:left; margin-bottom:5px; }
+ul.pix { margin:0px; padding: 0px; height: 75px;}
+ul.pix li { margin:0px; padding:0px; width:75px; height:75px; float:left; list-style: none; }
+li.plus { text-align:center; }
+li.plus span { font-size:30px; margin:0px; padding:0px; line-height:30px; }
+h3 { margin:0px; padding:2px; font-family: "lane"; font-size:30px;}
+a { color:white; }
+</style>
+<h1>Welcome, {{ user.username }}</h1>
+<ul class="groups">
+{% for group in user.membership.all %}
+  <li><h3><a href="{{ group.get_absolute_url }}">{{ group }}</a></h3>
+  <ul class="pix">
+  {% if group.get_users_online_count < 6 %}
+    {% for user in group.get_users_online %}
+      <li title="{{ user.username }}" style="display:none">
+        {% if user.get_profile.picture_75 %}
+          <img src="{{ user.get_profile.picture_75 }}" title="{{ user.username }}">
+        {% else %}
+          ???
+        {% endif %}
+      </li>
+    {% empty %}
+	<li style="line-height:75px; display:none;">Nobody!</li>
+    {% endfor %}
+  {% else %}
+    {% for user in group.get_users_online|slice:":5" %}
+      <li title="{{ user.username }}" style="display:none">
+        {% if user.get_profile.picture_75 %}
+          <img src="{{ user.get_profile.picture_75 }}" title="{{ user.username }}">
+        {% else %}
+          ???
+        {% endif %}
+      </li>
+    {% endfor %}
+    <li class="plus" style="display:none">and<br><span>{{ group.get_users_online_count|add:"-5" }}</span><br>more</li>
+  {% endif %}
+  </ul>
+</li>
+{% endfor %}
+</ul>
+<script>
+$(document).ready(function () {
+$('ul.pix li').each(function (i, element) {
+	$(element).delay(100*(i+1)).fadeIn()
+})
+});
+</script>
+{% endblock %}
