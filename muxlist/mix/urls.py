@@ -6,5 +6,6 @@ urlpatterns = patterns('muxlist.mix.views',
     (r'^(?P<group_name>.*)/force-next/$', 'next_track_force'),
     (r'^(?P<group_name>.*)/current/$', 'current_track'),
     (r'^(?P<group_name>.*)/heartbeat/$', 'heartbeat'),
+    (r'^(?P<group_name>.*)/music/', include('muxlist.music.urls')),
     (r'^(?P<group_name>.*)/$', 'index'),
 )
