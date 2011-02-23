@@ -74,7 +74,7 @@ ul#errors li.good { color: white; }
 </style>
 <script src="/static/jquery-1.4.2.min.js"></script>
 <body>
-<span id="login">{% if request.user.is_authenticated %}<a href="/dashboard/">{{ user.username }}</a> // <a href="/account/logout">Logout</a>{% else %}<a href="/account/login/">Login</a>{% endif %}</span>
+{% block login %}<span id="login">{% if user.is_authenticated %}<a href="/dashboard/">{{ user.username }}</a> // <a href="/account/logout">Logout</a>{% else %}<a href="/account/login/">Login</a>{% endif %}</span>{% endblock %}
 <div id="main">
 {% block content %}
 
