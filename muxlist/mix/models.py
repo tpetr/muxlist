@@ -145,15 +145,23 @@ class Group(models.Model):
     def check_for_next_track(self):
         r = _get_redis()
 
+        current_lock = '%s_current_lock' % self.id
+
         # don't continue if current song is playing or no queued tracks
-        if r.ttl('%s_current' % self.id) > -1: return None, None, None
+        if r.ttl('%s_current' % self.id) > -1:
+            comet_utils.send_debug("returning null bceause %s_current's ttl = %s" % (self.id, r.ttl('%s_current' % self.id)), self)
+            return None, None, None
 
-        lock = r.lock('%s_current_lock' % self.id)
-        if not lock.acquire(False): return None, None, None
+        if r.exists(current_lock):
+            comet_utils.send_debug("returning null bceause of lock")
+            return None, None, None
 
-        # next track!
-        results = self.next_track(r)
+        r.set(current_lock, 1)
 
-        lock.release()
+        try:
+            # next track!
+            results = self.next_track(r)
+        finally:
+            r.delete(current_lock)
 
         return results

@@ -27,11 +27,10 @@ def heartbeat(request, group_name):
 
 @receiver(track_uploaded, sender=None)
 def tu(sender, **kwargs):
-    group_name = 'test'
+    group = kwargs['group']
     user = kwargs['user']
     track = kwargs['track']
 
-    group = Group.objects.get(name=group_name)
     group.enqueue_track(track, user)
 
 def next_track(request, group_name):
