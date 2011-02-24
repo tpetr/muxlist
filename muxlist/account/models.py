@@ -8,7 +8,7 @@ from muxlist.mix.models import Group, _get_redis
 
 from time import time
 
-import settings
+import settings, urllib2
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)

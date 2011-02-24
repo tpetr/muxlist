@@ -9,7 +9,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Tom Petr', 'trpetr@gmail.com')
+    ('Tom Petr', 'trpetr@gmail.com'),
 )
 
 NEW_USER_NOTIFICATION = False
@@ -93,6 +93,7 @@ INSTALLED_APPS = (
     'muxlist.mix',
     'muxlist.account',
     'muxlist.comet',
+    'muxlist.redis_admin',
     'registration',
 )
 

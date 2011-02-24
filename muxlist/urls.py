@@ -4,8 +4,10 @@ import os, sys
 ROOT_PATH = os.path.abspath("%s/../" % os.path.dirname(__file__))
 
 # Uncomment the next two lines to enable the admin:
-from django.contrib import admin
-admin.autodiscover()
+from muxlist.redis_admin.admin import AdminSiteWithRedis
+
+admin = AdminSiteWithRedis()
+#admin.autodiscover()
 
 urlpatterns = []
 
@@ -14,7 +16,7 @@ if 'django.core.management.commands.runserver' in sys.modules:
     urlpatterns += patterns('', (r'media/(?P<path>.*)$', 'django.views.static.serve', {'document_root': os.path.join(ROOT_PATH, 'media/')}))
 
 urlpatterns += patterns('',
-    (r'^$', 'muxlist.account.views.launch_page'),
+    (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
     (r'^thanks/$', 'muxlist.account.views.launch_page_thanks'),
     (r'^invite/send/$', 'muxlist.account.views.send_invite'),
     (r'^invite/(?P<code>[a-zA-Z0-9]+)/$', 'muxlist.account.views.invite'),
@@ -26,4 +28,5 @@ urlpatterns += patterns('',
     (r'^account/', include('muxlist.account.urls')),
     (r'^restq/', include('muxlist.restq.urls')),
     (r'^comet/', include('muxlist.comet.urls')),
+    (r'^redis/', include('muxlist.redis_admin.urls')),
 )
