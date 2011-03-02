@@ -1,26 +1,36 @@
 def dequeue_track(r, group_id):
     user_id, track_id = None, None
 
+    # dequeue lock
     with r.lock('%s_users_lock' % group_id):
-        print "entered lock"
-        for current_user_id in r.zrange('%s_users' % group_id, 0, -1):
-            print "current_user_id: %s" % current_user_id
-            track_count = r.llen('%s_%s_queue' % (group_id, current_user_id))
-            print "   track_count: %s" % group_id
-        
-            if track_count == 0:
-                r.zrem('%s_users' % group_id, current_user_id)
-                print "      removed from zset"
-                continue
-        
+        while track_id == None:
+            # peek at most eligible user
+            user_id = r.zrange('%s_users' % group_id, 0, 1)
+
+            # if no users, return nothing
+            if len(user_id) == 0:
+                return None, None
+            else:
+                user_id = user_id[0]
+
+            # dequeue a track
+            track_id = r.lpop('%s_%s_queue' % (group_id, user_id))
+
+            # remove phantom user, shouldn't happen
             if track_id == None:
-                track_id = r.lpop('%s_%s_queue' % (group_id, current_user_id))
-                print "   track_id: %s" % track_id
-                r.decr('%s_queued' % group_id)
-                user_id = current_user_id
-        print "left lock"
+                r.zrem('%s_users' % group_id, user_id)
+                continue
 
-        if user_id != None:
-            r.zincrby('%s_users' % group_id, user_id, r.zcard('%s_users' % group_id))
+            # decrement total queued count
+            r.decr('%s_queued' % group_id)
 
-    return user_id, track_id
+            # if user is out of tracks, remove from zset, otherwise update rank
+            if r.llen('%s_%s_queue' % group_id, user_id) == 0:
+                r.zrem('%s_users' % group_id, user_id)
+            else:
+                r.zincrby('%_users' % group_id, user_id, r.zcard('%s_users' % group_id))
+
+            return user_id, track_id
+
+    # should never reach this
+    return None, None
