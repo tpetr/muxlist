@@ -4,10 +4,9 @@ import os, sys
 ROOT_PATH = os.path.abspath("%s/../" % os.path.dirname(__file__))
 
 # Uncomment the next two lines to enable the admin:
-from muxlist.redis_admin.admin import AdminSiteWithRedis
+from django.contrib import admin
 
-admin = AdminSiteWithRedis()
-#admin.autodiscover()
+admin.autodiscover()
 
 urlpatterns = []
 
@@ -28,5 +27,4 @@ urlpatterns += patterns('',
     (r'^account/', include('muxlist.account.urls')),
     (r'^restq/', include('muxlist.restq.urls')),
     (r'^comet/', include('muxlist.comet.urls')),
-    (r'^redis/', include('muxlist.redis_admin.urls')),
 )
