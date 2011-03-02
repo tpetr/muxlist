@@ -67,7 +67,9 @@ class Group(models.Model):
         if settings.DEBUG: comet_utils.send_debug("%s enqueued %s" % (user, track), self)
 
         # add user to group's queue set
-        r.zadd('%s_users' % self.id, user.id, 0)
+        if r.zscore('%s_users') == None:
+            r.zadd('%s_users' % self.id, user.id, 0)
+            r.zadd('%s_users_next' % self.id, user.id, 1)
 
         # send queue update if next song not pushed
         if self.check_for_next_track()[0] == None:
@@ -103,7 +105,7 @@ class Group(models.Model):
 
     def queued_users_count(self):
         r = _get_redis()
-        return r.scard('%s_users' % self.id)
+        return r.zcard('%s_users' % self.id)
 
     def recalculate_queued(self):
         r = _get_redis()
