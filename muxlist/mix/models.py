@@ -67,7 +67,7 @@ class Group(models.Model):
         if settings.DEBUG: comet_utils.send_debug("%s enqueued %s" % (user, track), self)
 
         # add user to group's queue set
-        if r.zscore('%s_users') == None:
+        if r.zscore('%s_users' % self.id, user.id) == None:
             r.zadd('%s_users' % self.id, user.id, 0)
             r.zadd('%s_users_next' % self.id, user.id, 1)
 

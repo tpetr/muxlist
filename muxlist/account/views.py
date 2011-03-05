@@ -4,7 +4,7 @@ from muxlist.account.forms import InviteRequestForm, InviteForm, SendInviteForm
 from muxlist.account.models import Invite
 from django.contrib.auth.decorators import login_required
 
-def launch_page(request):
+def request_invite(request):
     if request.method == "POST":
         form = InviteRequestForm(request.POST)
         if form.is_valid():

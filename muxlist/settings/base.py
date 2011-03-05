@@ -93,7 +93,6 @@ INSTALLED_APPS = (
     'muxlist.mix',
     'muxlist.account',
     'muxlist.comet',
-    'muxlist.redis_admin',
     'registration',
 )
 

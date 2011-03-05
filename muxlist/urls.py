@@ -17,6 +17,7 @@ if 'django.core.management.commands.runserver' in sys.modules:
 urlpatterns += patterns('',
     (r'^$', 'django.views.generic.simple.direct_to_template', {'template': 'index.html'}),
     (r'^thanks/$', 'muxlist.account.views.launch_page_thanks'),
+    (r'^request/$', 'muxlist.account.views.request_invite'),
     (r'^invite/send/$', 'muxlist.account.views.send_invite'),
     (r'^invite/(?P<code>[a-zA-Z0-9]+)/$', 'muxlist.account.views.invite'),
     (r'^okay/$', 'muxlist.account.views.okay'),
