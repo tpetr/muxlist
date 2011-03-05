@@ -53,6 +53,7 @@ $(document).ready(function () {
 				$('#cover_art').attr('src', data.track.cover_art);
 				$('#cover_art').fadeIn();
 			} else {
+				$('#cover_art').fadeOut();
 				$('#current').css('width', '598px');
 			}
 			if (data.track.queue_count) {
@@ -245,7 +246,7 @@ Logged in as {{ user }} <a href="/account/logout/">Logout</a>
 </span>
 {% endif %}
 </div>
-<div style="height:174px;border:1px solid;"><img id="cover_art" width="174" height="174" style="float:left"><div id="current" style="float:left">Nothing queued</div></div>
+<div style="height:174px;border:1px solid;overflow:hidden;"><img id="cover_art" width="174" height="174" style="float:left"><div id="current" style="float:left">Nothing queued</div></div>
 <div id="middle">
 <ul id="online" style="float:right; width: 50px; height:100%;">
 </ul>
