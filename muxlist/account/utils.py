@@ -84,3 +84,6 @@ def set_user_offline(user, r=None):
 
 def send_new_user_email(user):
     return send_mail("[muxlist] New user: %s" % user.username, render_to_string('email/new_user.html', {'user': user}), settings.SERVER_EMAIL, [a[1] for a in settings.ADMINS])
+
+def send_invite_request_email(ir):
+    return send_mail("[muxlist] Invite request: %s" % ir.email, render_to_string('email/invite_request.html', {'invite_request': ir}), settings.SERVER_EMAIL, [a[1] for a in settings.ADMINS])

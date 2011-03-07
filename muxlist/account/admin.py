@@ -3,7 +3,7 @@ from muxlist.account.models import InviteRequest, Invite, UserProfile
 import hashlib
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from settings import HOSTNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ROOT_PATH
+from settings import HOSTNAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, ROOT_PATH, SERVER_EMAIL
 from boto.ses import SESConnection
 import os, urllib2
 
@@ -18,7 +18,7 @@ def send_invite(modeladmin, request, queryset):
         i = Invite.objects.create(owner=request.user, email=r.email, code=h.hexdigest())
         r.delete()
         c = SESConnection(AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY)
-        send_mail("[muxlist] You're invited!", render_to_string('email/invite.html', {'hostname': HOSTNAME, 'invite': i}), 'trpetr@gmail.com', [i.email])
+        send_mail("[muxlist] You're invited!", render_to_string('email/invite.html', {'hostname': HOSTNAME, 'invite': i}), SERVER_EMAIL, [i.email])
 send_invite.short_description = "Send invites"
 
 class InviteRequestAdmin(admin.ModelAdmin):

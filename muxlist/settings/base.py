@@ -13,6 +13,7 @@ ADMINS = (
 )
 
 NEW_USER_NOTIFICATION = False
+INVITE_REQUEST_NOTIFICATION = False
 
 USER_IDLE_TIME = 5
 
@@ -27,7 +28,7 @@ DATABASES = {
 
 LOGIN_REDIRECT_URL = '/dashboard/'
 
-SERVER_EMAIL = 'trpetr@gmail.com'
+SERVER_EMAIL = 'no-reply@muxli.st'
 EMAIL_SUBJECT_PREFIX = '[muxlist] '
 
 # Local time zone for this installation. Choices can be found here:

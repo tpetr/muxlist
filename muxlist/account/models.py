@@ -2,13 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.template.loader import render_to_string
 from django.core.mail import send_mail
-from muxlist.account.utils import send_new_user_email
+from muxlist.account.utils import send_new_user_email, send_invite_request_email
 
 from muxlist.mix.models import Group, _get_redis
 
 from time import time
 
 import settings, urllib2
+from django.dispatch import receiver
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User)
@@ -20,6 +21,7 @@ class UserProfile(models.Model):
     def __unicode__(self):
         return self.user.__unicode__()
 
+@receiver(models.signals.post_save, sender=User)
 def create_userprofile(sender, instance, created, **kwargs):
     if created:
         UserProfile.objects.create(user=instance)
@@ -31,7 +33,6 @@ def create_userprofile(sender, instance, created, **kwargs):
             pass
         send_new_user_email(instance)
 
-models.signals.post_save.connect(create_userprofile, sender=User)
 
 class Invite(models.Model):
     owner = models.ForeignKey(User)
@@ -50,3 +51,8 @@ class InviteRequest(models.Model):
 
     def __unicode__(self):
         return self.email
+
+@receiver(models.signals.post_save, sender=InviteRequest)
+def invite_request_notification(sender, instance, created, **kwargs):
+    if created and settings.INVITE_REQUEST_NOTIFICATION:
+        send_invite_request_email(instance)
